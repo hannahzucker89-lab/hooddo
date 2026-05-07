@@ -21,3 +21,13 @@ body {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+/* הסרת חצים באינפוט מספר */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}

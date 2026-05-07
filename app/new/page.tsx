@@ -1,57 +1,91 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { supabase, CATEGORIES } from '@/lib/supabase'
 import { isValidIsraeliPhone, normalizeIsraeliPhone } from '@/utils/phone'
 import { getSavedName, saveName, getSavedPhone, savePhone } from '@/utils/storage'
+import dynamic from 'next/dynamic'
 
-type TimeOption = 'עכשיו' | 'היום' | 'מחר'
+const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false })
 
-const TASK_IDEAS = [
-  { emoji: '🐶', label: 'טיול עם הכלב' },
-  { emoji: '🪴', label: 'השקיית עציצים' },
-  { emoji: '🧺', label: 'קיפול כביסה' },
-  { emoji: '🔧', label: 'תליית מדף' },
-  { emoji: '📱', label: 'עזרה עם הטלפון' },
-  { emoji: '📦', label: 'סידור ארון' },
-  { emoji: '🧾', label: 'עזרה בבירוקרטיה' },
-]
+type TimeOption = 'מיידי' | 'השבוע' | 'גמיש'
+type ItemType = 'task' | 'offer'
+
+async function geocodeAddress(address: string, city: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const full = `${address}, ${city}`
+    const res = await fetch(`/api/geocode?address=${encodeURIComponent(full)}`)
+    if (!res.ok) return null
+    const data = await res.json()
+    if (!data.lat || !data.lng) return null
+    return { lat: data.lat, lng: data.lng }
+  } catch {
+    return null
+  }
+}
 
 export default function NewTaskPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
+  const typeParam = searchParams.get('type')
+  const initialType: ItemType = typeParam === 'offer' ? 'offer' : 'task'
+
+  const [itemType, setItemType] = useState<ItemType>(initialType)
+  const [category, setCategory] = useState('')
   const [title, setTitle] = useState('')
-  const [timeOption, setTimeOption] = useState<TimeOption>('היום')
+const [description, setDescription] = useState('')
+  const [timeOption, setTimeOption] = useState<TimeOption>('השבוע')
+const [exactDate, setExactDate] = useState('')
   const [duration, setDuration] = useState('')
-  const [reward, setReward] = useState('')
-  const [rewardOther, setRewardOther] = useState(false)
-  const [locationSource, setLocationSource] = useState<'gps' | 'manual'>('manual')
+  const [reward, setReward] = useState(25)
+
+  // ── Location state — all together ──
+  const [locationMode, setLocationMode] = useState<'gps' | 'map' | 'address'>('map')
   const [addressText, setAddressText] = useState('')
+  const [city] = useState('תל אביב') // TODO: make editable in future version
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [gpsLoading, setGpsLoading] = useState(false)
+  const [geocoding, setGeocoding] = useState(false)
+
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [savePhoneLocal, setSavePhoneLocal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
-  const [gpsLoading, setGpsLoading] = useState(false)
   const submitCooldown = useRef(false)
+
+  const isTask = itemType === 'task'
 
   useEffect(() => {
     setName(getSavedName())
     setPhone(getSavedPhone())
-  }, [])
+    const idea = searchParams.get('idea')
+    if (idea) setTitle(idea)
+  }, [searchParams])
+
+  useEffect(() => { setCategory('') }, [itemType])
+
+  // Auto-request GPS when mode switches to gps
+  useEffect(() => {
+    if (locationMode === 'gps' && !gpsCoords) {
+      requestGPS()
+    }
+  }, [locationMode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function requestGPS() {
-    if (!navigator.geolocation) { setLocationSource('manual'); return }
+    if (!navigator.geolocation) return
     setGpsLoading(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        setLocationSource('gps')
+        setAddressText('')
         setGpsLoading(false)
       },
-      () => { setLocationSource('manual'); setGpsLoading(false) }
+      () => { setGpsLoading(false) },
+      { timeout: 10000, enableHighAccuracy: false }
     )
   }
 
@@ -59,15 +93,25 @@ export default function NewTaskPage() {
     if (submitCooldown.current || submitting) return
     setError('')
 
-    if (title.trim().length < 5) { setError('יש לתאר את המשימה (לפחות 5 תווים)'); return }
-    if (title.trim().length > 120) { setError('תיאור המשימה ארוך מדי (עד 120 תווים)'); return }
-    const dur = parseInt(duration)
-    if (!duration || isNaN(dur) || dur < 5 || dur > 120) { setError('יש להזין משך זמן (5–120 דקות)'); return }
-    const rew = reward === '' ? 0 : parseInt(reward)
-    if (isNaN(rew) || rew < 0 || rew > 500) { setError('תגמול לא תקין (0–500 ₪)'); return }
+    if (title.trim().length < 5) { setError('יש לתאר את הפריט (לפחות 5 תווים)'); return }
+    if (title.trim().length > 120) { setError('תיאור ארוך מדי (עד 120 תווים)'); return }
+
+    let dur = 0
+    if (isTask) {
+      dur = parseInt(duration)
+      if (!duration || isNaN(dur) || dur < 5 || dur > 120) {
+        setError('יש להזין משך זמן (5–120 דקות)')
+        return
+      }
+    }
+
     if (!name.trim()) { setError('יש להזין שם או כינוי'); return }
     if (!isValidIsraeliPhone(phone)) { setError('מספר טלפון לא תקין'); return }
-    if (locationSource === 'manual' && !addressText.trim()) { setError('יש להזין כתובת'); return }
+
+    if (!gpsCoords && !mapCoords && !addressText.trim()) {
+      setError('כדי שהשכנים הקרובים יוכלו למצוא את הפריט, יש לבחור מיקום')
+      return
+    }
 
     saveName(name.trim())
     if (savePhoneLocal) savePhone(phone)
@@ -76,29 +120,33 @@ export default function NewTaskPage() {
     submitCooldown.current = true
     setTimeout(() => { submitCooldown.current = false }, 10000)
 
-    const payload: {
-      title: string
-      time_option: string
-      duration_minutes: number
-      reward_ils: number
-      display_name: string
-      phone: string
-      location_source: string
-      address_text: string | null
-      lat: number | null
-      lng: number | null
-      is_active: boolean
-    } = {
+    let finalCoords = gpsCoords ?? mapCoords
+
+    if (!finalCoords && addressText.trim()) {
+      setGeocoding(true)
+      finalCoords = await geocodeAddress(addressText.trim(), city)
+      setGeocoding(false)
+
+      if (!finalCoords) {
+        setError('לא הצלחנו למצוא את הכתובת — נסי לכתוב אותה בצורה מלאה יותר, לדוגמה: רוטשילד 22, תל אביב')
+        setSubmitting(false)
+        return
+      }
+    }
+
+    const payload = {
+      type: itemType,
+      category: category || null,
       title: title.trim(),
       time_option: timeOption,
-      duration_minutes: dur,
-      reward_ils: rew,
+      duration_minutes: isTask ? dur : 0,
+      reward_ils: reward,
       display_name: name.trim(),
       phone: normalizeIsraeliPhone(phone),
-      location_source: locationSource,
-      address_text: locationSource === 'manual' ? addressText.trim() : null,
-      lat: locationSource === 'gps' ? gpsCoords?.lat ?? null : null,
-      lng: locationSource === 'gps' ? gpsCoords?.lng ?? null : null,
+      location_source: gpsCoords ? 'gps' : 'manual',
+      address_text: null,
+      lat: finalCoords?.lat ?? null,
+      lng: finalCoords?.lng ?? null,
       is_active: true,
     }
 
@@ -111,12 +159,8 @@ export default function NewTaskPage() {
       .single()
 
     if (dbError || !data) {
-      console.error('[HoodDo] Supabase insert error (full object):', dbError)
-      console.error('[HoodDo] error.message:', dbError?.message)
-      console.error('[HoodDo] error.details:', dbError?.details)
-      console.error('[HoodDo] error.hint:   ', dbError?.hint)
-      console.error('[HoodDo] error.code:   ', dbError?.code)
-      setError('שגיאה בפרסום המשימה. אנא נסו שוב.')
+      console.error('[HoodDo] Supabase error:', dbError)
+      setError('שגיאה בפרסום. אנא נסו שוב.')
       setSubmitting(false)
       return
     }
@@ -124,182 +168,248 @@ export default function NewTaskPage() {
     router.push(`/task/${data.id}?new=1`)
   }
 
+  const categories = CATEGORIES[itemType]
+  const rewardLabel = reward === 0 ? 'ללא תמורה' : `${reward} ₪`
+  const isLoading = submitting || geocoding
+
   return (
     <main className="max-w-md mx-auto px-4 pb-12">
 
-      {/* ── Header ── */}
       <div className="pt-6 pb-5 flex items-center gap-3">
         <button onClick={() => router.back()} className="text-stone-400 text-2xl leading-none">‹</button>
-        <h1 className="text-xl font-extrabold text-stone-900">במה אפשר לעזור?</h1>
+        <h1 className="text-xl font-extrabold text-stone-900">
+          {isTask ? 'במה אפשר לעזור?' : 'מה אני מציע/ה?'}
+        </h1>
       </div>
 
       <div className="space-y-5">
 
-        {/* ── Title + suggestions ── */}
-        <Field label="תיאור המשימה">
-          <textarea
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="טיול עם הכלב, השקיית עציצים, קיפול כביסה..."
-            maxLength={120}
-            rows={2}
-            className="input resize-none"
-          />
-          <CharCount current={title.length} max={120} />
+       
 
-          {/* Idea chips */}
-          <div className="mt-3">
-            <p className="text-xs text-stone-400 font-semibold mb-2">רעיונות למשימות</p>
-            <div className="flex flex-wrap gap-2">
-              {TASK_IDEAS.map(({ emoji, label }) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => setTitle(`${emoji} ${label}`)}
-                  className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
-                    title === `${emoji} ${label}`
-                      ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
-                      : 'bg-stone-100 text-stone-600 border-transparent'
-                  }`}
-                >
-                  {emoji} {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </Field>
-
-        {/* ── Time ── */}
-        <Field label="מתי?">
-          <div className="flex gap-2">
-            {(['עכשיו', 'היום', 'מחר'] as TimeOption[]).map((opt) => (
+        {/* ── Category ── */}
+        <Field label="קטגוריה">
+          <div className="flex flex-wrap gap-2">
+            {categories.map(({ emoji, label }) => (
               <button
-                key={opt}
-                onClick={() => setTimeOption(opt)}
-                className={`flex-1 py-3 rounded-xl text-sm font-semibold border transition-colors ${
-                  timeOption === opt
+                key={label}
+                type="button"
+                onClick={() => setCategory(label === category ? '' : label)}
+                className={`text-sm px-3 py-1.5 rounded-full border transition-colors ${
+                  category === label
                     ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
                     : 'bg-white text-stone-600 border-stone-200'
                 }`}
               >
-                {opt}
+                {emoji} {label}
               </button>
             ))}
           </div>
         </Field>
 
-        {/* ── Duration ── */}
-        <Field label="משך זמן משוער (דקות)">
-          <div className="flex gap-2 mb-2">
-            {[15, 30, 60].map((d) => (
-              <button
-                key={d}
-                onClick={() => setDuration(String(d))}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
-                  duration === String(d)
-                    ? 'bg-stone-800 text-white border-stone-800'
-                    : 'bg-white text-stone-600 border-stone-200'
-                }`}
-              >
-                {d} דק׳
-              </button>
-            ))}
-          </div>
+        {/* ── Title ── */}
+        <Field label={isTask ? 'כותרת המשימה' : 'כותרת ההצעה'}>
           <input
-            type="number"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="או הקלד מספר אחר (5–120)"
-            min={5}
-            max={120}
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={
+              isTask
+                ? 'טיול עם הכלב, השקיית עציצים...'
+                : category ? `מציע/ה עזרה ב${category}` : 'מציע/ה עזרה ב...'
+            }
+            maxLength={80}
             className="input"
           />
+          <div className="text-xs text-stone-400 mt-1 text-left">{title.length}/80</div>
         </Field>
 
-        {/* ── Reward ── */}
-        <Field label="תגמול (₪)">
-          <div className="flex flex-wrap gap-2 mb-2">
-            {([20, 40, 60, 80] as number[]).map((r) => (
+        <Field label="פירוט (אופציונלי)">
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder={
+              isTask
+                ? 'פרטים נוספים שיעזרו לשכנים להבין במה מדובר...'
+                : 'ספר/י עוד על הניסיון שלך, הזמינות, או כל פרט שיעזור לשכנים...'
+            }
+            maxLength={400}
+            rows={3}
+            className="input resize-none"
+          />
+          <div className="text-xs text-stone-400 mt-1 text-left">{description.length}/400</div>
+        </Field>
+
+        {/* ── Time — tasks only ── */}
+        {isTask && (
+          <Field label="מתי?">
+            <div className="flex gap-2 flex-wrap">
+              {(['מיידי', 'השבוע', 'גמיש'] as TimeOption[]).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => { setTimeOption(opt); setExactDate('') }}
+                  className={`flex-1 py-3 rounded-xl text-sm font-semibold border transition-colors ${
+                    timeOption === opt && !exactDate
+                      ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+                      : 'bg-white text-stone-600 border-stone-200'
+                  }`}
+                >
+                  {opt}
+                </button>
+              ))}
               <button
-                key={r}
-                onClick={() => { setReward(String(r)); setRewardOther(false) }}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
-                  !rewardOther && reward === String(r)
-                    ? 'bg-amber-600 text-white border-amber-600'
+                type="button"
+                onClick={() => setExactDate(new Date().toISOString().split('T')[0])}
+                className={`flex-1 py-3 rounded-xl text-sm font-semibold border transition-colors ${
+                  exactDate
+                    ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
                     : 'bg-white text-stone-600 border-stone-200'
                 }`}
               >
-                {r} ₪
+                📅 תאריך
               </button>
-            ))}
-            <button
-              onClick={() => { setReward('0'); setRewardOther(false) }}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
-                !rewardOther && reward === '0'
-                  ? 'bg-amber-600 text-white border-amber-600'
-                  : 'bg-white text-stone-600 border-stone-200'
-              }`}
-            >
-              ללא
-            </button>
-            <button
-              onClick={() => { setRewardOther(true); setReward('') }}
-              className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
-                rewardOther
-                  ? 'bg-amber-600 text-white border-amber-600'
-                  : 'bg-white text-stone-600 border-stone-200'
-              }`}
-            >
-              אחר
-            </button>
-          </div>
-          {rewardOther && (
+            </div>
+            {exactDate && (
+              <input
+                type="date"
+                value={exactDate}
+                onChange={(e) => setExactDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="input mt-2"
+                dir="ltr"
+              />
+            )}
+          </Field>
+        )}
+
+
+        {/* ── Duration — tasks only ── */}
+        {isTask && (
+          <Field label="משך זמן משוער (דקות)">
+            <div className="flex gap-2 mb-2">
+              {[15, 30, 60].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDuration(String(d))}
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
+                    duration === String(d)
+                      ? 'bg-stone-800 text-white border-stone-800'
+                      : 'bg-white text-stone-600 border-stone-200'
+                  }`}
+                >
+                  {d} דק׳
+                </button>
+              ))}
+            </div>
             <input
               type="number"
-              value={reward}
-              onChange={(e) => setReward(e.target.value)}
-              placeholder="הזן סכום (0–500 ₪)"
-              min={0}
-              max={500}
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="או הקלד מספר אחר (5–120)"
+              min={5}
+              max={120}
               className="input"
-              autoFocus
             />
-          )}
+          </Field>
+        )}
+
+        {/* ── Reward ── */}
+        <Field label={`תמורה: ${rewardLabel}`}>
+          <input
+            type="range"
+            min={0}
+            max={200}
+            step={5}
+            value={reward}
+            onChange={(e) => setReward(Number(e.target.value))}
+            className="w-full accent-[#1b5e20]"
+            dir="ltr"
+          />
+          <div className="flex justify-between text-xs text-stone-400 mt-1">
+            <span>200 ₪</span>
+            <span>ללא תמורה</span>
+          </div>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="text-xs text-stone-400 shrink-0">סכום אחר:</span>
+            <input
+              type="number"
+              min={0}
+              max={9999}
+              value={reward === 0 ? '' : reward}
+              onChange={(e) => setReward(Number(e.target.value) || 0)}
+              placeholder="הקלד סכום"
+              className="input py-2 text-sm"
+            />
+            <span className="text-xs text-stone-400 shrink-0">₪</span>
+          </div>
         </Field>
 
         {/* ── Location ── */}
-        <Field label="מיקום">
-          {locationSource === 'gps' && gpsCoords ? (
-            <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-              <span className="text-sm text-green-700 font-medium">📍 מיקום GPS נקלט</span>
+        <Field label={isTask ? 'מיקום המשימה' : 'מיקום ההצעה'}>
+          <p className="text-xs text-stone-400 mb-2 leading-relaxed">
+            המיקום לא יוצג לאחרים — משמש רק לחישוב המרחק בין שכנים
+          </p>
+
+          {/* ── בחירת שיטה ── */}
+          <div className="flex gap-2 mb-3">
+            {(['address', 'map', 'gps'] as const).map((mode) => (
               <button
-                onClick={() => { setLocationSource('manual'); setGpsCoords(null) }}
-                className="text-xs text-stone-400 underline"
+                key={mode}
+                type="button"
+                onClick={() => setLocationMode(mode)}
+                className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
+                  locationMode === mode
+                    ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+                    : 'bg-white text-stone-500 border-stone-200'
+                }`}
               >
-                שנה
+                {mode === 'gps' ? '📍 GPS' : mode === 'map' ? '🗺️ מפה' : '⌨️ כתובת'}
               </button>
-            </div>
-          ) : (
-            <>
+            ))}
+          </div>
+
+          {/* ── GPS ── */}
+          {locationMode === 'gps' && (
+            gpsCoords ? (
+              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                <span className="text-sm text-green-700 font-medium">📍 מיקום זוהה</span>
+                <button type="button" onClick={() => setGpsCoords(null)} className="text-xs text-stone-400 underline">
+                  הסר
+                </button>
+              </div>
+            ) : (
               <button
+                type="button"
                 onClick={requestGPS}
                 disabled={gpsLoading}
-                className="w-full mb-2 border border-stone-200 bg-white rounded-xl py-3 text-sm text-stone-600 font-medium flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                className="w-full border border-stone-200 bg-white rounded-xl py-3 text-sm text-stone-600 font-medium flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-60"
               >
-                {gpsLoading ? <span className="animate-pulse">מאתר...</span> : <>📍 השתמש במיקום שלי</>}
+                {gpsLoading ? <span className="animate-pulse">מאתר מיקום...</span> : <>📍 השתמש במיקומי הנוכחי</>}
               </button>
-              <input
-                type="text"
-                value={addressText}
-                onChange={(e) => setAddressText(e.target.value)}
-                placeholder="או הקלד כתובת (לדוג׳: שדרות רוטשילד 10)"
-                className="input"
-              />
-            </>
+            )
+          )}
+
+          {/* ── מפה ── */}
+          {locationMode === 'map' && (
+            <LocationPicker
+              selected={mapCoords}
+              onSelect={(coords) => setMapCoords(coords)}
+            />
+          )}
+
+          {/* ── כתובת ── */}
+          {locationMode === 'address' && (
+            <input
+              type="text"
+              value={addressText}
+              onChange={(e) => setAddressText(e.target.value)}
+              placeholder="לדוגמה: רוטשילד 22, תל אביב"
+              className="input"
+            />
           )}
         </Field>
-
-        {/* ── Name ── */}
+{/* ── Name ── */}
         <Field label="שם / כינוי">
           <input
             type="text"
@@ -327,23 +437,30 @@ export default function NewTaskPage() {
               onChange={(e) => setSavePhoneLocal(e.target.checked)}
               className="rounded"
             />
-            שמור מספר למשימות הבאות
+            שמור מספר לפעמים הבאות
           </label>
         </Field>
-
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 leading-relaxed">
             {error}
           </div>
         )}
 
         <button
+          type="button"
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={isLoading}
           className="w-full bg-[#1b5e20] text-white font-bold text-lg py-4 rounded-2xl shadow-md active:scale-95 transition-transform disabled:opacity-60"
         >
-          {submitting ? 'שולח...' : '➕ פרסום משימה'}
+          {geocoding
+            ? 'מאמת כתובת...'
+            : submitting
+            ? 'שולח...'
+            : isTask
+            ? '➕ פרסום משימה'
+            : '➕ פרסום הצעה'}
         </button>
+
       </div>
 
       <style jsx>{`
@@ -373,11 +490,5 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <label className="block text-sm font-semibold text-stone-700 mb-1.5">{label}</label>
       {children}
     </div>
-  )
-}
-
-function CharCount({ current, max }: { current: number; max: number }) {
-  return (
-    <div className="text-xs text-stone-400 mt-1 text-left">{current}/{max}</div>
   )
 }

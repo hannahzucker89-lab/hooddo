@@ -1,19 +1,36 @@
-import type { Metadata } from 'next'
-import './globals.css'
+'use client'
 
-export const metadata: Metadata = {
-  title: 'HoodDo – משימות שכונתיות',
-  description: 'שוק משימות שכונתי – כיכר רבין וגן דובנוב',
-}
+import { useEffect, useState } from 'react'
+import Onboarding, { useOnboardingDone } from '@/components/Onboarding'
+import './globals.css'
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const [ready, setReady] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  useEffect(() => {
+    // Check after mount (client-only)
+    const done = useOnboardingDone()
+    setShowOnboarding(!done)
+    setReady(true)
+  }, [])
+
   return (
     <html lang="he" dir="rtl">
-      <body className="min-h-screen bg-[#f9f7f4]">{children}</body>
+      <head>
+        <title>HoodDo – משימות שכונתיות</title>
+        <meta name="description" content="שוק משימות שכונתי" />
+      </head>
+      <body className="min-h-screen bg-[#f9f7f4]">
+        {ready && showOnboarding && (
+          <Onboarding onComplete={() => setShowOnboarding(false)} />
+        )}
+        {children}
+      </body>
     </html>
   )
 }

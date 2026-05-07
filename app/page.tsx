@@ -2,142 +2,184 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { supabase, type Task } from '@/lib/supabase'
 import TaskCard from '@/components/TaskCard'
 import { calculateDistanceMeters } from '@/utils/distance'
 
 type ViewerLocation = { lat: number; lng: number }
+type Tab = 'tasks' | 'offers'
 
-const RABIN_LAT = 32.0809
-const RABIN_LNG = 34.7806
-const MAX_DISTANCE = 500
+const TAB_SUBTITLE: Record<Tab, string> = {
+  tasks: 'בקשות קטנות מהשכונה',
+  offers: 'דברים ששכנים ישמחו לעזור בהם',
+}
 
-const TASK_IDEAS = [
-  { emoji: '🐶', label: 'טיול עם הכלב' },
-  { emoji: '🪴', label: 'השקיית עציצים' },
-  { emoji: '🧺', label: 'קיפול כביסה' },
-  { emoji: '🔧', label: 'תליית מדף' },
-  { emoji: '📱', label: 'עזרה עם הטלפון' },
-  { emoji: '📦', label: 'סידור ארון' },
-  { emoji: '🧾', label: 'עזרה בבירוקרטיה' },
-]
-
+function radiusLabel(meters: number, tab: Tab): string {
+  const type = tab === 'tasks' ? 'משימות' : 'הצעות'
+  if (meters < 1000) return `${type} עד ${meters} מ׳ ממך`
+  const km = meters / 1000
+  return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
+}
 export default function HomePage() {
-  const router = useRouter()
-  const [tasks, setTasks] = useState<Task[]>([])
+  const [allItems, setAllItems] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState<Tab>('tasks')
   const [viewerLocation, setViewerLocation] = useState<ViewerLocation | null>(null)
   const [locationLoading, setLocationLoading] = useState(false)
   const [locationDenied, setLocationDenied] = useState(false)
+  const [radius, setRadius] = useState(500)
 
-  useEffect(() => { fetchTasks() }, [])
+  useEffect(() => { fetchAll() }, [])
 
-  async function fetchTasks() {
+  async function fetchAll() {
     setLoading(true)
     const { data } = await supabase
       .from('tasks')
       .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false })
-    setTasks(data ?? [])
+    setAllItems(data ?? [])
     setLoading(false)
   }
 
   const requestLocation = useCallback(() => {
-    if (!navigator.geolocation) {
-      setLocationDenied(true)
-      return
-    }
+    if (!navigator.geolocation) { setLocationDenied(true); return }
     setLocationLoading(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setViewerLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         setLocationLoading(false)
       },
-      () => {
-        setLocationDenied(true)
-        setLocationLoading(false)
-      },
+      () => { setLocationDenied(true); setLocationLoading(false) },
       { timeout: 10000, enableHighAccuracy: false }
     )
   }, [])
 
-  const enrichedTasks = tasks
-    .map((task) => {
-      const taskLat = task.lat ?? RABIN_LAT
-      const taskLng = task.lng ?? RABIN_LNG
-      const dist = viewerLocation
-        ? calculateDistanceMeters(viewerLocation.lat, viewerLocation.lng, taskLat, taskLng)
-        : null
-      return { task, dist }
+  useEffect(() => { requestLocation() }, [requestLocation])
+
+  const tabFiltered = allItems.filter((item) =>
+    tab === 'tasks' ? item.type === 'task' : item.type === 'offer'
+  )
+
+  const enriched = tabFiltered
+    .map((item) => {
+      const dist =
+        viewerLocation && item.lat && item.lng
+          ? calculateDistanceMeters(viewerLocation.lat, viewerLocation.lng, item.lat, item.lng)
+          : null
+      return { item, dist }
     })
-    .filter(({ dist }) => viewerLocation && dist !== null ? dist <= MAX_DISTANCE : true)
+    .filter(({ dist }) => viewerLocation && dist != null ? dist <= radius : true)
     .sort((a, b) => {
-      if (viewerLocation && a.dist !== null && b.dist !== null && a.dist !== b.dist)
+      if (viewerLocation && a.dist != null && b.dist != null && a.dist !== b.dist)
         return a.dist - b.dist
-      return new Date(b.task.created_at).getTime() - new Date(a.task.created_at).getTime()
+      return new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime()
     })
 
-  // Nearby filter active but no results within 500m
-  const nearbyEmpty = viewerLocation && enrichedTasks.length === 0 && tasks.length > 0
+  const nearbyEmpty = viewerLocation && enriched.length === 0 && tabFiltered.length > 0
+  const isTask = tab === 'tasks'
 
   return (
-    <main className="max-w-md mx-auto px-4 pb-10">
+    <main className="max-w-md mx-auto px-4 pb-28">
 
-      {/* ── Header ── */}
-      <div className="pt-7 pb-2">
+      {/* ── 1. Logo ── */}
+      <div className="pt-8 pb-0">
         <h1 className="text-2xl font-extrabold tracking-tight text-stone-900">HoodDo 🏘️</h1>
-        <p className="text-sm text-stone-500 mt-0.5">משימות בין שכנים באזור שלך</p>
-        <p className="text-xs font-semibold text-[#1b5e20] mt-0.5">כיכר רבין</p>
+        <p className="text-sm font-medium text-stone-600 mt-1 mb-0">
+          לפעמים הפתרון נמצא ממש מעבר לפינה
+        </p>
       </div>
 
-      {/* ── Tagline ── */}
-      <p className="text-sm text-stone-500 leading-relaxed mt-3 mb-4">
-        HoodDo מחבר בין שכנים שצריכים עזרה קטנה לשכנים שמוכנים לעזור.
-      </p>
+      <div className="mb-4" />
 
-      {/* ── Prompt + CTA ── */}
-      <p className="text-base font-semibold text-stone-700 mb-2">איך אפשר לעזור לך היום?</p>
-      <Link
-        href="/new"
-        className="flex items-center justify-center gap-2 w-full bg-[#1b5e20] text-white font-bold text-base py-3.5 rounded-2xl shadow-sm active:scale-95 transition-transform mb-5"
-      >
-        ➕ פרסום משימה
-      </Link>
+      {/* ── Location + radius strip ── */}
+      <div className="mb-4 px-1">
 
-      {/* ── Location button ── */}
-      {!viewerLocation && !locationDenied && (
-        <button
-          onClick={requestLocation}
-          disabled={locationLoading}
-          className="w-full mb-4 flex items-center justify-center gap-2 border border-stone-200 bg-white rounded-xl py-3 text-sm text-stone-600 font-medium active:scale-95 transition-transform disabled:opacity-60"
-        >
-          {locationLoading
-            ? <span className="animate-pulse">מאתר מיקום...</span>
-            : <>📍 משימות עד 500 מ׳ ממך</>}
-        </button>
-      )}
+        {/* Location row */}
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-stone-400">
+            {locationLoading
+              ? '📍 מאתר מיקום...'
+              : viewerLocation
+              ? '📍 מיקום נוכחי'
+              : '📍 מיקום לא הוגדר'}
+          </span>
+          {viewerLocation ? (
+            <button
+              onClick={() => setViewerLocation(null)}
+              className="text-xs text-stone-400 underline"
+            >
+              נקה
+            </button>
+          ) : (
+            <button
+              onClick={() => { setLocationDenied(false); requestLocation() }}
+              className="text-xs text-[#1b5e20] font-semibold underline"
+            >
+              {locationLoading ? '' : 'בחירת מיקום'}
+            </button>
+          )}
+        </div>
 
-      {viewerLocation && (
-        <div className="mb-4 bg-green-50 border border-green-100 rounded-xl px-4 py-2.5 text-sm text-green-700 flex items-center justify-between">
-          <span>📍 מציג משימות עד 500 מ׳ ממך</span>
+        {/* Slider */}
+        <input
+          type="range"
+          min={200}
+          max={2000}
+          step={100}
+          value={radius}
+          onChange={(e) => setRadius(2200 - Number(e.target.value))}
+          value={2200 - radius}
+          className="w-full"
+          style={{ direction: 'rtl' }}
+        />
+
+        {/* Radius label with min/max */}
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-xs text-stone-300">2 ק״מ</span>
+          <span className="text-xs text-stone-400">{radiusLabel(radius, tab)}</span>
+          <span className="text-xs text-stone-300">200 מ׳</span>
+        </div>
+
+      </div>
+     
+
+      {/* ── 4. Tabs + subtitle ── */}
+      <div className="mb-4">
+        <div className="flex gap-1.5 bg-stone-100 p-1 rounded-2xl">
           <button
-            onClick={() => setViewerLocation(null)}
-            className="text-xs text-stone-400 underline"
+            onClick={() => setTab('tasks')}
+            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
+              tab === 'tasks'
+                ? 'bg-white text-[#1b5e20] shadow-sm'
+                : 'text-stone-400'
+            }`}
           >
-            הצג הכל
+            🙋 משימות בשכונה
+          </button>
+          <button
+            onClick={() => setTab('offers')}
+            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
+              tab === 'offers'
+                ? 'bg-white text-[#5c6bc0] shadow-sm'
+                : 'text-stone-400'
+            }`}
+          >
+            🤝 הצעות בשכונה
           </button>
         </div>
-      )}
+        <p
+          key={tab}
+          className={`text-xs text-center mt-1.5 transition-opacity ${
+            tab === 'tasks' ? 'text-[#2e7d32]' : 'text-[#5c6bc0]'
+          }`}
+          style={{ animation: 'fadeIn 0.2s ease' }}
+        >
+          {TAB_SUBTITLE[tab]}
+        </p>
+      </div>
 
-      {locationDenied && (
-        <div className="mb-4 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 text-sm text-amber-700">
-          לא ניתן לגשת למיקום – מציג משימות באזור כיכר רבין
-        </div>
-      )}
-
-      {/* ── Feed ── */}
+      {/* ── 5. Feed ── */}
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -145,82 +187,102 @@ export default function HomePage() {
           ))}
         </div>
       ) : nearbyEmpty ? (
-        <NearbyEmptyState onShowAll={() => setViewerLocation(null)} />
-      ) : enrichedTasks.length === 0 ? (
-        <EmptyState />
+        <NearbyEmptyState onShowAll={() => setViewerLocation(null)} isTask={isTask} />
+      ) : enriched.length === 0 ? (
+        <EmptyState isTask={isTask} />
       ) : (
         <>
-          <p className="text-xs font-semibold text-stone-400 uppercase tracking-wide mb-3">
-            משימות שמחכות לעזרה באזור
-          </p>
+          
           <div className="space-y-3">
-            {enrichedTasks.map(({ task, dist }, index) => (
+            {enriched.map(({ item, dist }, index) => (
               <TaskCard
-                key={task.id}
-                task={task}
-                distanceMeters={dist !== null ? dist : undefined}
+                key={item.id}
+                task={item}
+                distanceMeters={dist ?? undefined}
                 highlight={index === 0}
               />
             ))}
           </div>
         </>
       )}
+
+      {/* ── FAB ── */}
+      <Link
+        href={tab === 'offers' ? '/new?type=offer' : '/new?type=task'}
+        className={`fixed bottom-6 left-1/2 -translate-x-1/2 text-white font-bold text-sm px-6 py-3.5 rounded-full shadow-lg active:scale-95 transition-transform whitespace-nowrap z-40 ${
+          tab === 'offers' ? 'bg-[#5c6bc0]' : 'bg-[#1b5e20]'
+        }`}
+      >
+        {tab === 'offers' ? '➕ פרסום הצעה' : '➕ פרסום משימה'}
+      </Link>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0.3; transform: translateY(-2px); }
+          to   { opacity: 1;   transform: translateY(0); }
+        }
+        input[type=range] {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 3px;
+          background: #e7e5e4;
+          border-radius: 2px;
+          outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #a8a29e;
+          cursor: pointer;
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        input[type=range]::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #a8a29e;
+          cursor: pointer;
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+      `}</style>
+
     </main>
   )
 }
 
-function NearbyEmptyState({ onShowAll }: { onShowAll: () => void }) {
+function NearbyEmptyState({ onShowAll, isTask }: { onShowAll: () => void; isTask: boolean }) {
   return (
     <div className="mt-6 text-center px-2">
       <p className="text-stone-500 text-base mb-3">
-        כרגע אין משימות בטווח 500 מ׳ מהמיקום הזה.
+        {isTask ? 'כרגע אין משימות בטווח הזה.' : 'כרגע אין הצעות בטווח הזה.'}
       </p>
       <button
         onClick={onShowAll}
         className="inline-flex items-center justify-center gap-2 border border-stone-300 text-stone-600 font-semibold px-6 py-3 rounded-2xl text-sm active:scale-95 transition-transform"
       >
-        חזרה למשימות באזור
+        הצג הכל באזור
       </button>
     </div>
   )
 }
 
-function EmptyState() {
+function EmptyState({ isTask }: { isTask: boolean }) {
   return (
-    <div className="mt-6 text-center px-2">
-      <p className="text-stone-500 text-base mb-3">
-        אין משימות כרגע באזור שלך.
+    <div className="mt-8 text-center px-2">
+      <p className="text-3xl mb-3">{isTask ? '🙋' : '🤝'}</p>
+      <p className="text-stone-500 text-base mb-2">
+        {isTask ? 'אין משימות כרגע באזור שלך.' : 'אין הצעות עזרה כרגע באזור שלך.'}
       </p>
       <p className="text-sm text-stone-400 leading-relaxed mb-5">
-        HoodDo מחבר בין שכנים שצריכים עזרה קטנה לשכנים שמוכנים לעזור.
+        {isTask
+          ? 'אפשר לפרסם משימה ושכנים יוכלו לעזור'
+          : 'אפשר להציע עזרה ושכנים יוכלו לפנות אליך'}
       </p>
-      <p className="text-base font-semibold text-stone-700 mb-3">איך אפשר לעזור לך היום?</p>
-      <Link
-        href="/new"
-        className="inline-flex items-center justify-center gap-2 bg-[#1b5e20] text-white font-bold px-8 py-3.5 rounded-2xl text-base shadow-sm active:scale-95 transition-transform"
-      >
-        ➕ פרסום משימה
-      </Link>
-      <TaskIdeasList />
-    </div>
-  )
-}
-
-function TaskIdeasList() {
-  return (
-    <div className="mt-7 text-right">
-      <p className="text-xs text-stone-400 mb-3 font-semibold">רעיונות למשימות</p>
-      <div className="flex flex-wrap gap-2">
-        {TASK_IDEAS.map(({ emoji, label }) => (
-          <Link
-            key={label}
-            href={`/new?idea=${encodeURIComponent(emoji + ' ' + label)}`}
-            className="text-sm bg-stone-100 text-stone-600 px-3 py-1.5 rounded-full active:scale-95 transition-transform"
-          >
-            {emoji} {label}
-          </Link>
-        ))}
-      </div>
     </div>
   )
 }
