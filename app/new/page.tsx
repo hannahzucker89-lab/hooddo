@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, CATEGORIES } from '@/lib/supabase'
 import { isValidIsraeliPhone, normalizeIsraeliPhone } from '@/utils/phone'
@@ -25,7 +25,8 @@ async function geocodeAddress(address: string, city: string): Promise<{ lat: num
   }
 }
 
-export default function NewTaskPage() {
+
+function NewTaskForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -490,5 +491,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <label className="block text-sm font-semibold text-stone-700 mb-1.5">{label}</label>
       {children}
     </div>
+  )
+}
+export default function NewTaskPage() {
+  return (
+    <Suspense>
+      <NewTaskForm />
+    </Suspense>
   )
 }
