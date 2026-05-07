@@ -127,7 +127,6 @@ export default function HomePage() {
           min={200}
           max={2000}
           step={100}
-          value={radius}
           onChange={(e) => setRadius(2200 - Number(e.target.value))}
           value={2200 - radius}
           className="w-full"
