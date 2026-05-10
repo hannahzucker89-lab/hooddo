@@ -53,7 +53,6 @@ const [exactDate, setExactDate] = useState('')
 
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [savePhoneLocal, setSavePhoneLocal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const submitCooldown = useRef(false)
@@ -115,7 +114,7 @@ const [exactDate, setExactDate] = useState('')
     }
 
     saveName(name.trim())
-    if (savePhoneLocal) savePhone(phone)
+    savePhone(phone)
 
     setSubmitting(true)
     submitCooldown.current = true
@@ -431,15 +430,7 @@ const [exactDate, setExactDate] = useState('')
             className="input"
             dir="ltr"
           />
-          <label className="flex items-center gap-2 mt-2 text-sm text-stone-500 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={savePhoneLocal}
-              onChange={(e) => setSavePhoneLocal(e.target.checked)}
-              className="rounded"
-            />
-            שמור מספר לפעמים הבאות
-          </label>
+          
         </Field>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 leading-relaxed">
