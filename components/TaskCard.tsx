@@ -86,26 +86,41 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
       {/* ── Footer ── */}
       <div className="flex items-center justify-between">
         <span className="text-sm text-stone-400">{task.display_name}</span>
-        {isOwner ? (
-          <Link
-            href={`/task/${task.id}`}
-            className="bg-stone-100 text-stone-500 font-semibold text-sm px-4 py-2 rounded-xl active:scale-95 transition-transform"
+        <div className="flex gap-2">
+          <button
+            onClick={async (e) => {
+              e.preventDefault()
+              const url = `${window.location.origin}/task/${task.id}`
+              if (navigator.share) {
+                await navigator.share({ title: task.title, url })
+              } else {
+                await navigator.clipboard.writeText(url)
+              }
+            }}
+            className="text-stone-400 text-xs px-2 py-2 border border-stone-200 rounded-xl active:scale-95 transition-transform"
           >
-            ניהול
-          </Link>
-        ) : (
-          <Link
-            href={`/task/${task.id}`}
-            className={`font-semibold text-sm px-4 py-2 rounded-xl active:scale-95 transition-transform ${
-              isOffer
-                ? 'bg-[#ede7f6] text-[#5c6bc0]'
-                : 'bg-[#e8f5e9] text-[#2e7d32]'
-            }`}
-          >
-            {isOffer ? 'שליחת הודעה' : 'לפרטים נוספים'}
-          </Link>
-        )}
+            🔗
+          </button>
+          {isOwner ? (
+            <Link
+              href={`/task/${task.id}`}
+              className="bg-stone-100 text-stone-500 font-semibold text-sm px-4 py-2 rounded-xl active:scale-95 transition-transform"
+            >
+              ניהול
+            </Link>
+          ) : (
+            <Link
+              href={`/task/${task.id}`}
+              className={`font-semibold text-sm px-4 py-2 rounded-xl active:scale-95 transition-transform ${
+                isOffer
+                  ? 'bg-[#ede7f6] text-[#5c6bc0]'
+                  : 'bg-[#e8f5e9] text-[#2e7d32]'
+              }`}
+            >
+              {isOffer ? 'שליחת הודעה' : 'לפרטים נוספים'}
+            </Link>
+          )}
+        </div>
       </div>
-    </div>
   )
 }
