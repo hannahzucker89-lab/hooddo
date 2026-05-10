@@ -57,8 +57,30 @@ export default function HomePage() {
 
   useEffect(() => { requestLocation() }, [requestLocation])
 
+  function isExpired(item: Task): boolean {
+    const created = new Date(item.created_at).getTime()
+    const now = Date.now()
+    const hours = (now - created) / (1000 * 60 * 60)
+
+    if (item.time_option === 'מיידי') return hours > 24
+    if (item.time_option === 'השבוע') return hours > 24 * 7
+    if (item.exact_date) return new Date(item.exact_date) < new Date(new Date().toDateString())
+    return false // גמיש — לא נעלם
+  }
+
+  function isExpired(item: Task): boolean {
+    const created = new Date(item.created_at).getTime()
+    const now = Date.now()
+    const hours = (now - created) / (1000 * 60 * 60)
+
+    if (item.time_option === 'מיידי') return hours > 24
+    if (item.time_option === 'השבוע') return hours > 24 * 7
+    if (item.exact_date) return new Date(item.exact_date) < new Date(new Date().toDateString())
+    return false
+  }
+
   const tabFiltered = allItems.filter((item) =>
-    tab === 'tasks' ? item.type === 'task' : item.type === 'offer'
+    (tab === 'tasks' ? item.type === 'task' : item.type === 'offer') && !isExpired(item)
   )
 
   const enriched = tabFiltered

@@ -41,7 +41,8 @@ export type Task = {
 description: string | null
   type: ItemType | null          // null = legacy row, treat as 'task'
   category: string | null
-  time_option: 'עכשיו' | 'היום' | 'מחר'
+exact_date: string | null
+  time_option: 'מיידי' | 'השבוע' | 'גמיש'
   duration_minutes: number
   reward_ils: number
   display_name: string
