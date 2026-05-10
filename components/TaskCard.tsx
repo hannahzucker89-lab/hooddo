@@ -120,7 +120,8 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
               {isOffer ? 'שליחת הודעה' : 'לפרטים נוספים'}
             </Link>
           )}
-        </div>
+       </div>
       </div>
+    </div>
   )
 }
