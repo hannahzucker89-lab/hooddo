@@ -23,6 +23,7 @@ function radiusLabel(meters: number, tab: Tab): string {
 export default function HomePage() {
   const [allItems, setAllItems] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
+  const [tab, setTab] = useState<Tab>('tasks')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [viewerLocation, setViewerLocation] = useState<ViewerLocation | null>(null)
   const [locationLoading, setLocationLoading] = useState(false)
@@ -197,39 +198,6 @@ const filtered = tabFiltered.filter((item) => {
           {TAB_SUBTITLE[tab]}
         </p>
       </div>
-
-{/* ── Category filter chips ── */}
-      <div className="mb-4 overflow-x-auto">
-        <div className="flex gap-2 pb-1" style={{ width: 'max-content' }}>
-          <button
-            onClick={() => setSelectedCategories([])}
-            className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors ${
-              selectedCategories.length === 0
-                ? 'bg-stone-800 text-white border-stone-800'
-                : 'bg-white text-stone-500 border-stone-200'
-            }`}
-          >
-            הכל
-          </button>
-          {CATEGORIES_LIST.map(({ emoji, label }) => (
-            <button
-              key={label}
-              onClick={() => toggleCategory(label)}
-              className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors ${
-                selectedCategories.includes(label)
-                  ? tab === 'offers'
-                    ? 'bg-[#5c6bc0] text-white border-[#5c6bc0]'
-                    : 'bg-[#1b5e20] text-white border-[#1b5e20]'
-                  : 'bg-white text-stone-500 border-stone-200'
-              }`}
-            >
-              {emoji} {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-
 
 {/* ── Category filter chips ── */}
       <div className="mb-4 overflow-x-auto">
