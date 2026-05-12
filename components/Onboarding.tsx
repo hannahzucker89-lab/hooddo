@@ -20,7 +20,7 @@ const EXAMPLES = [
 ]
 
 export default function Onboarding({ onComplete }: Props) {
-  const [screen, setScreen] = useState<1 | 2>(1)
+  const [screen, setScreen] = useState<1 | 2 | 3>(1)
   const [activeTab, setActiveTab] = useState<'tasks' | 'offers'>('tasks')
 
   function finish() {
@@ -34,7 +34,7 @@ export default function Onboarding({ onComplete }: Props) {
 
         {/* Progress dots */}
         <div className="flex gap-2 justify-center mb-8">
-          {[1, 2].map((s) => (
+          {[1, 2, 3].map((s) => (
             <div
               key={s}
               className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -49,10 +49,13 @@ export default function Onboarding({ onComplete }: Props) {
 
           {screen === 1 && (
             <div className="space-y-5">
-              <div className="text-4xl mb-2">🏘️</div>
-              <h2 className="text-xl font-bold text-stone-900 leading-snug">
-                HoodDo מחברת בין שכנים שצריכים עזרה קטנה לאנשים בסביבה שיכולים לעזור.
+              <div className="text-5xl mb-2">🏘️</div>
+              <h2 className="text-2xl font-bold text-stone-900 leading-snug">
+                שכנים עוזרים לשכנים
               </h2>
+              <p className="text-stone-500 text-base leading-relaxed">
+                HoodDo מחברת בין אנשים באזור שלך — לדברים קטנים שקל לעזור בהם, וקשה לעשות לבד.
+              </p>
               <div className="flex flex-col gap-2 mt-4">
                 {EXAMPLES.map(({ emoji, label }) => (
                   <div
@@ -69,7 +72,10 @@ export default function Onboarding({ onComplete }: Props) {
 
           {screen === 2 && (
             <div className="space-y-5">
-              {/* Animated tabs preview */}
+              <div className="text-5xl mb-2">🙋 🤝</div>
+              <h2 className="text-2xl font-bold text-stone-900 leading-snug">
+                לבקש או להציע
+              </h2>
               <div className="bg-stone-100 p-1 rounded-2xl flex gap-1 mb-2">
                 <button
                   onClick={() => setActiveTab('tasks')}
@@ -88,27 +94,32 @@ export default function Onboarding({ onComplete }: Props) {
                   🤝 הצעות בשכונה
                 </button>
               </div>
-
-              {/* Tab description */}
               <div
                 key={activeTab}
                 className="bg-white border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-600 shadow-sm"
                 style={{ animation: 'fadeIn 0.2s ease' }}
               >
                 {activeTab === 'tasks'
-                  ? 'בקשות קטנות מהשכונה'
-                  : 'דברים ששכנים שמחים לעזור בהם'}
+                  ? '🙋 צריך/ה עזרה? פרסום משימה קטנה ושכנים בסביבה יוכלו לעזור.'
+                  : '🤝 יש לך זמן או יכולת? הצעת עזרה ושכנים יפנו אליך.'}
               </div>
-
-              <p className="text-stone-500 text-sm leading-relaxed mt-2">
-                אפשר לפרסם משימה קטנה
-                <br />
-                או להציע עזרה לאחרים בסביבה
-              </p>
             </div>
           )}
 
-        </div>
+          {screen === 3 && (
+            <div className="space-y-5">
+              <div className="text-5xl mb-2">📍</div>
+              <h2 className="text-2xl font-bold text-stone-900 leading-snug">
+                הכל קרוב אליך
+              </h2>
+              <p className="text-stone-500 text-base leading-relaxed">
+                HoodDo משתמשת במיקום שלך כדי להציג רק משימות והצעות מהאזור הקרוב.
+              </p>
+              <div className="bg-white border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-500 shadow-sm">
+                🔒 הכתובת לא נחשפת לאף אחד — רק המרחק מוצג לשכנים.
+              </div>
+            </div>
+          )}
 
         {/* CTA */}
         <div className="mt-8">
@@ -121,6 +132,14 @@ export default function Onboarding({ onComplete }: Props) {
             </button>
           )}
           {screen === 2 && (
+            <button
+              onClick={() => setScreen(3)}
+              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-2xl active:scale-95 transition-transform"
+            >
+              המשך
+            </button>
+          )}
+          {screen === 3 && (
             <button
               onClick={finish}
               className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-2xl active:scale-95 transition-transform"
