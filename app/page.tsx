@@ -217,7 +217,7 @@ const filtered = tabFiltered.filter((item) => {
       </div>
 
 {showFilters && (
-{/* ── Category filter chips ── */}
+  <div>
       <div className="mb-4 overflow-x-auto">
         <div className="flex gap-2 pb-1" style={{ width: 'max-content' }}>
           <button
@@ -264,6 +264,7 @@ const filtered = tabFiltered.filter((item) => {
           </button>
         ))}
       </div>
+  </div>
 )}
 
       {/* ── 5. Feed ── */}
