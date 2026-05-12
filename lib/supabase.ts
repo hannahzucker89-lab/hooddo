@@ -9,7 +9,15 @@ if (!supabaseAnonKey) console.error('[HoodDo] Missing NEXT_PUBLIC_SUPABASE_ANON_
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 export type ItemType = 'task' | 'offer'
-
+export const CATEGORIES_LIST = [
+  { emoji: '🐶', label: 'חיות' },
+  { emoji: '🪴', label: 'צמחים' },
+  { emoji: '🧹', label: 'סדר וארגון' },
+  { emoji: '💻', label: 'טכנולוגיה' },
+  { emoji: '🧾', label: 'בירוקרטיה' },
+  { emoji: '🔧', label: 'תיקונים' },
+  { emoji: '✨', label: 'אחר' },
+] as const
 export const CATEGORIES = {
   task: [
     { emoji: '🐶', label: 'בעלי חיים' },
