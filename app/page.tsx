@@ -30,6 +30,7 @@ export default function HomePage() {
   const [locationDenied, setLocationDenied] = useState(false)
   const [radius, setRadius] = useState(500)
 const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
+const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => { fetchAll() }, [])
 
@@ -198,8 +199,24 @@ const filtered = tabFiltered.filter((item) => {
         >
           {TAB_SUBTITLE[tab]}
         </p>
+<button
+          onClick={() => setShowFilters(prev => !prev)}
+          className={`flex items-center gap-1 text-xs mt-2 px-3 py-1 rounded-full border transition-colors w-full justify-center ${
+            showFilters || selectedCategories.length > 0 || rewardFilter !== 'all'
+              ? 'bg-stone-100 text-stone-600 border-stone-300'
+              : 'bg-white text-stone-400 border-stone-200'
+          }`}
+        >
+          🔽 סינון
+          {(selectedCategories.length > 0 || rewardFilter !== 'all') && (
+            <span className="bg-[#1b5e20] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              {selectedCategories.length + (rewardFilter !== 'all' ? 1 : 0)}
+            </span>
+          )}
+        </button>
       </div>
 
+{showFilters && (
 {/* ── Category filter chips ── */}
       <div className="mb-4 overflow-x-auto">
         <div className="flex gap-2 pb-1" style={{ width: 'max-content' }}>
@@ -247,6 +264,7 @@ const filtered = tabFiltered.filter((item) => {
           </button>
         ))}
       </div>
+)}
 
       {/* ── 5. Feed ── */}
       {loading ? (
