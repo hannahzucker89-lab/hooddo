@@ -121,6 +121,8 @@ export default function Onboarding({ onComplete }: Props) {
             </div>
           )}
 
+        </div>
+
         {/* CTA */}
         <div className="mt-8">
           {screen === 1 && (
