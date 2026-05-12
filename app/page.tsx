@@ -29,6 +29,7 @@ export default function HomePage() {
   const [locationLoading, setLocationLoading] = useState(false)
   const [locationDenied, setLocationDenied] = useState(false)
   const [radius, setRadius] = useState(500)
+const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
 
   useEffect(() => { fetchAll() }, [])
 
@@ -228,6 +229,23 @@ const filtered = tabFiltered.filter((item) => {
             </button>
           ))}
         </div>
+      </div>
+
+{/* ── Reward filter ── */}
+      <div className="flex gap-2 mb-4">
+        {([['all', 'הכל'], ['paid', '₪ בתשלום'], ['free', '🤝 ללא תמורה']] as ['all' | 'paid' | 'free', string][]).map(([val, lbl]) => (
+          <button
+            key={val}
+            onClick={() => setRewardFilter(val)}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+              rewardFilter === val
+                ? 'bg-stone-600 text-white border-stone-600'
+                : 'bg-white text-stone-400 border-stone-200'
+            }`}
+          >
+            {lbl}
+          </button>
+        ))}
       </div>
 
       {/* ── 5. Feed ── */}
