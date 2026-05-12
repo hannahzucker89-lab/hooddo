@@ -92,7 +92,7 @@ const [exactDate, setExactDate] = useState('')
   async function handleSubmit() {
     if (submitCooldown.current || submitting) return
     setError('')
-
+if (!category) { setError('יש לבחור קטגוריה לפני פרסום'); return }
     if (title.trim().length < 5) { setError('יש לתאר את הפריט (לפחות 5 תווים)'); return }
     if (title.trim().length > 120) { setError('תיאור ארוך מדי (עד 120 תווים)'); return }
 
@@ -441,7 +441,7 @@ const [exactDate, setExactDate] = useState('')
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={isLoading}
+          disabled={isLoading || !category}
           className="w-full bg-[#1b5e20] text-white font-bold text-lg py-4 rounded-2xl shadow-md active:scale-95 transition-transform disabled:opacity-60"
         >
           {geocoding
