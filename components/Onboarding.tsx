@@ -74,7 +74,7 @@ export default function Onboarding({ onComplete }: Props) {
           {screen === 3 && (
   <div className="space-y-5">
     <img src="/Ob3.svg" alt="" className="w-64 mx-auto mb-4" />
-    <h2 className="text-stone-500 text-lg leading-relaxed"">
+    <h2 className="text-2xl font-bold text-stone-900 leading-snug">
       הכל קרוב אליך
     </h2>
     <p className="text-stone-500 text-lg leading-relaxed">
