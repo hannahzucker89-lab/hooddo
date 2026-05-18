@@ -74,14 +74,14 @@ export default function Onboarding({ onComplete }: Props) {
           {screen === 3 && (
   <div className="space-y-5">
     <img src="/Ob3.svg" alt="" className="w-64 mx-auto mb-4" />
-    <h2 className="text-stone-500 text-lg leading-relaxed">
+    <h2 className="text-stone-500 text-lg leading-relaxed"">
       הכל קרוב אליך
     </h2>
     <p className="text-stone-500 text-lg leading-relaxed">
       רק דברים מהסביבה שלך — במרחק שנוח לך, ובלי לחשוף כתובת מדויקת.
     </p>
-    <div className="bg-white border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-500 shadow-sm">
-      🔒 הכתובת לא נחשפת — רק המרחק ביניכם
+    <div className="text-stone-500 text-lg leading-relaxed"">
+       הכתובת לא נחשפת — רק המרחק ביניכם
     </div>
   </div>
 )}
