@@ -48,78 +48,43 @@ export default function Onboarding({ onComplete }: Props) {
         <div className="flex-1 flex flex-col justify-center">
 
           {screen === 1 && (
-            <div className="space-y-5">
-              <img src="/Ob1.svg" alt="" className="w-64 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-stone-900 leading-snug">
-                שכנים עוזרים לשכנים
-              </h2>
-              <p className="text-stone-500 text-base leading-relaxed">
-                HoodDo מחברת בין אנשים באזור שלך — לדברים קטנים שקל לעזור בהם, וקשה לעשות לבד.
-              </p>
-              <div className="flex flex-col gap-2 mt-4">
-                {EXAMPLES.map(({ emoji, label }) => (
-                  <div
-                    key={label}
-                    className="flex items-center gap-3 bg-white border border-stone-100 rounded-xl px-4 py-3 text-stone-700 text-sm font-medium shadow-sm"
-                  >
-                    <span className="text-xl">{emoji}</span>
-                    <span>{label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+  <div className="space-y-5">
+    <img src="/Ob1.svg" alt="" className="w-64 mx-auto mb-4" />
+    <h2 className="text-2xl font-bold text-stone-900 leading-snug">
+      שכנים עוזרים לשכנים
+    </h2>
+    <p className="text-stone-500 text-lg leading-relaxed">
+      כי לפעמים הפתרון נמצא ממש מעבר לפינה.
+    </p>
+  </div>
+)}
           {screen === 2 && (
-            <div className="space-y-5">
-              <img src="/Ob2.svg" alt="" className="w-64 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-stone-900 leading-snug">
-                לבקש או להציע
-              </h2>
-              <div className="bg-stone-100 p-1 rounded-2xl flex gap-1 mb-2">
-                <button
-                  onClick={() => setActiveTab('tasks')}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-                    activeTab === 'tasks' ? 'bg-white text-[#1b5e20] shadow-sm' : 'text-stone-400'
-                  }`}
-                >
-                  🙋 משימות בשכונה
-                </button>
-                <button
-                  onClick={() => setActiveTab('offers')}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${
-                    activeTab === 'offers' ? 'bg-white text-[#5c6bc0] shadow-sm' : 'text-stone-400'
-                  }`}
-                >
-                  🤝 הצעות בשכונה
-                </button>
-              </div>
-              <div
-                key={activeTab}
-                className="bg-white border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-600 shadow-sm"
-                style={{ animation: 'fadeIn 0.2s ease' }}
-              >
-                {activeTab === 'tasks'
-                  ? '🙋 צריך/ה עזרה? פרסום משימה קטנה ושכנים בסביבה יוכלו לעזור.'
-                  : '🤝 יש לך זמן או יכולת? הצעת עזרה ושכנים יפנו אליך.'}
-              </div>
-            </div>
-          )}
+  <div className="space-y-5">
+    <img src="/Ob2.svg" alt="" className="w-64 mx-auto mb-4" />
+    <h2 className="text-2xl font-bold text-stone-900 leading-snug">
+      אפשר לבקש ואפשר להציע
+    </h2>
+    <p className="text-stone-500 text-lg leading-relaxed">
+      כי כולנו צריכים עזרה קטנה מדי פעם, ולפעמים אנחנו דווקא פנויים לעזור.
+      HoodDo עושה את החיבור בין שכנים קרובים.
+    </p>
+  </div>
+)}
 
           {screen === 3 && (
-            <div className="space-y-5">
-              <img src="/Ob3.svg" alt="" className="w-64 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-stone-900 leading-snug">
-                הכל קרוב אליך
-              </h2>
-              <p className="text-stone-500 text-base leading-relaxed">
-                HoodDo משתמשת במיקום שלך כדי להציג רק משימות והצעות מהאזור הקרוב.
-              </p>
-              <div className="bg-white border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-500 shadow-sm">
-                🔒 הכתובת לא נחשפת לאף אחד — רק המרחק מוצג לשכנים.
-              </div>
-            </div>
-          )}
+  <div className="space-y-5">
+    <img src="/Ob3.svg" alt="" className="w-64 mx-auto mb-4" />
+    <h2 className="text-2xl font-bold text-stone-900 leading-snug">
+      הכל קרוב אליך
+    </h2>
+    <p className="text-stone-500 text-lg leading-relaxed">
+      רק דברים מהסביבה שלך — במרחק שנוח לך, ובלי לחשוף כתובת מדויקת.
+    </p>
+    <div className="bg-white border border-stone-100 rounded-xl px-4 py-3 text-sm text-stone-500 shadow-sm">
+      🔒 הכתובת לא נחשפת — רק המרחק ביניכם
+    </div>
+  </div>
+)}
 
         </div>
 
