@@ -80,8 +80,9 @@ export default function Onboarding({ onComplete }: Props) {
     <p className="text-stone-500 text-lg leading-relaxed">
       רק דברים מהסביבה שלך — במרחק שנוח לך, ובלי לחשוף כתובת מדויקת.
     </p>
-    <div className="text-stone-500 text-lg leading-relaxed"">
-       הכתובת לא נחשפת — רק המרחק ביניכם
+    <p className="text-stone-400 text-sm">
+   הכתובת לא נחשפת — רק המרחק ביניכם
+</p>
     </div>
   </div>
 )}
