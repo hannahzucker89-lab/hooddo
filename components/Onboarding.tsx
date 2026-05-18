@@ -49,7 +49,7 @@ export default function Onboarding({ onComplete }: Props) {
 
           {screen === 1 && (
             <div className="space-y-5">
-              <div className="text-5xl mb-2">🏘️</div>
+              <img src="/ob1.svg" alt="" className="w-64 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-stone-900 leading-snug">
                 שכנים עוזרים לשכנים
               </h2>
@@ -72,7 +72,7 @@ export default function Onboarding({ onComplete }: Props) {
 
           {screen === 2 && (
             <div className="space-y-5">
-              <div className="text-5xl mb-2">🙋 🤝</div>
+              <img src="/ob2.svg" alt="" className="w-64 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-stone-900 leading-snug">
                 לבקש או להציע
               </h2>
@@ -108,7 +108,7 @@ export default function Onboarding({ onComplete }: Props) {
 
           {screen === 3 && (
             <div className="space-y-5">
-              <div className="text-5xl mb-2">📍</div>
+              <img src="/ob3.svg" alt="" className="w-64 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-stone-900 leading-snug">
                 הכל קרוב אליך
               </h2>
