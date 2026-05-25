@@ -359,7 +359,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
                 key={mode}
                 type="button"
                 onClick={() => setLocationMode(mode)}
-                className={`flex-1 py-2 rounded-xl text-xs font-bold border transition-colors ${
+                className={`flex-1 py-2 rounded-full text-xs font-bold border transition-colors ${
                   locationMode === mode
                     ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
                     : 'bg-white text-stone-500 border-stone-200'
