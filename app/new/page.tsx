@@ -178,7 +178,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
       <div className="pt-6 pb-5 flex items-center gap-3">
         <button onClick={() => router.back()} className="text-stone-400 text-2xl leading-none">‹</button>
         <h1 className="text-xl font-extrabold text-stone-900">
-          {isTask ? 'במה אפשר לעזור?' : 'מה אני מציע/ה?'}
+          {isTask ? 'במה אפשר לעזור לך?' : 'מה יש לך להציע?'}
         </h1>
       </div>
 
@@ -187,7 +187,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
        
 
         {/* ── Category ── */}
-        <Field label="קטגוריה">
+        <Field label="תחום">
           <div className="flex flex-wrap gap-2">
             {categories.map(({ emoji, label }) => (
               <button
@@ -207,7 +207,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
         </Field>
 
         {/* ── Title ── */}
-        <Field label={isTask ? 'כותרת המשימה' : 'כותרת ההצעה'}>
+        <Field label={isTask ? 'כותרת הבקשה' : 'כותרת ההצעה'}>
           <input
             type="text"
             value={title}
@@ -220,18 +220,20 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
             maxLength={80}
             className="input"
           />
+<div className="text-xs text-stone-400 mt-1">זה מה שיופיע במסך הבית</div>
           <div className="text-xs text-stone-400 mt-1 text-left">{title.length}/80</div>
         </Field>
 
-        <Field label="פירוט (אופציונלי)">
+        <Field label={isTask ? 'מומלץ להוסיף עוד פרטים שיעזרו לשכנים להבין' : 'מומלץ להוסיף כמה מילים שיעזרו לשכנים להבין'}>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={
-              isTask
-                ? 'פרטים נוספים שיעזרו לשכנים להבין במה מדובר...'
-                : 'ספר/י עוד על הניסיון שלך, הזמינות, או כל פרט שיעזור לשכנים...'
-            }
+               isTask
+        ? 'פרטים נוספים שיעזרו לשכנים להבין במה מדובר...'
+        : 'כמה מילים על מה שאת/ה מציע/ה...'
+    }
+  />
             maxLength={400}
             rows={3}
             className="input resize-none"
@@ -285,7 +287,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
 
         {/* ── Duration — tasks only ── */}
         {isTask && (
-          <Field label="משך זמן משוער (דקות)">
+          <Field label="כמה זמן בערך?">
             <div className="flex gap-2 mb-2">
               {[15, 30, 60].map((d) => (
                 <button
@@ -346,7 +348,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
         </Field>
 
         {/* ── Location ── */}
-        <Field label={isTask ? 'מיקום המשימה' : 'מיקום ההצעה'}>
+        <Field label="מיקום">
           <p className="text-xs text-stone-400 mb-2 leading-relaxed">
             המיקום לא יוצג לאחרים — משמש רק לחישוב המרחק בין שכנים
           </p>
@@ -421,7 +423,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
         </Field>
 
         {/* ── Phone ── */}
-        <Field label="מספר WhatsApp">
+        <Field label="WhatsApp ליצירת קשר">
           <input
             type="tel"
             value={phone}
@@ -449,8 +451,8 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
             : submitting
             ? 'שולח...'
             : isTask
-            ? '➕ פרסום משימה'
-            : '➕ פרסום הצעה'}
+? '➕ בקשה חדשה'
+: '➕ הצעה חדשה'}
         </button>
 
       </div>

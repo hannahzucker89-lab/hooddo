@@ -81,7 +81,7 @@ export default function Onboarding({ onComplete }: Props) {
                 רק דברים מהסביבה שלך — במרחק שנוח לך, ובלי לחשוף כתובת מדויקת.
               </p>
               <p className="text-stone-400 text-sm">
-                🔒 הכתובת לא נחשפת — רק המרחק ביניכם
+               הכתובת לא נחשפת - רק המרחק ביניכם
               </p>
             </div>
           )}
