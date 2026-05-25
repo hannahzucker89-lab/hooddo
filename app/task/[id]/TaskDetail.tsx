@@ -150,7 +150,7 @@ export default function TaskDetail() {
         </h1>
         <button
           onClick={handleShare}
-          className="text-stone-400 text-sm px-3 py-1.5 border border-stone-200 rounded-xl active:scale-95 transition-transform"
+          className="text-stone-400 text-sm px-3 py-1.5 border border-stone-200 rounded-full active:scale-95 transition-transform"
         >
           {shared ? '✓ הועתק' : '🔗 שיתוף'}
         </button>
@@ -207,7 +207,7 @@ export default function TaskDetail() {
           href={buildWhatsApp()}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-2xl shadow-sm active:scale-95 transition-transform text-base"
+          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
         >
           {isOffer ? '💬 יצירת קשר' : '💬 יצירת קשר'}
         </a>
