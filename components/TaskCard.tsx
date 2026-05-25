@@ -59,9 +59,9 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
           </span>
         )}
         <h2 className="text-base font-semibold leading-snug flex-1">
-  <span className="text-stone-400 font-normal">{task.display_name} · </span>
-  {task.title}
-</h2>
+          <span className="text-stone-400 font-normal">{task.display_name} · </span>
+          {task.title}
+        </h2>
       </div>
 
       {/* ── Description (offers) ── */}
@@ -87,47 +87,43 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
       </div>
 
       {/* ── Footer ── */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
-          
-          {isOwner ? (
-            <Link
-              href={`/task/${task.id}`}
-              className="bg-stone-100 text-stone-500 font-semibold text-sm px-4 py-2 rounded-xl active:scale-95 transition-transform"
-            >
-              ניהול
-            </Link>
-          ) : (
-            <Link
-              href={`/task/${task.id}`}
-              className={`font-semibold text-sm px-4 py-2 rounded-xl active:scale-95 transition-transform ${
-                isOffer
-                  ? 'bg-[#ede7f6] text-[#5c6bc0]'
-                  : 'bg-[#e8f5e9] text-[#2e7d32]'
-              }`}
-            >
-              {isOffer ? 'שליחת הודעה' : 'לפרטים נוספים'}
-            </Link>
-          )}
-<button
-            onClick={async (e) => {
-              e.preventDefault()
-              const url = `${window.location.origin}/task/${task.id}`
-              if (navigator.share) {
-                await navigator.share({ title: task.title, url })
-              } else {
-                await navigator.clipboard.writeText(url)
-              }
-            }}
-            className="text-stone-400 text-xs px-2 py-2 border border-stone-200 rounded-xl active:scale-95 transition-transform"
+      <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-stone-100">
+        <button
+          onClick={async (e) => {
+            e.preventDefault()
+            const url = `${window.location.origin}/task/${task.id}`
+            if (navigator.share) {
+              await navigator.share({ title: task.title, url })
+            } else {
+              await navigator.clipboard.writeText(url)
+            }
+          }}
+          className="text-stone-300 text-xs px-2 py-1.5 rounded-lg active:scale-95 transition-transform"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 17L7 7"/>
+            <path d="M17 7H7v10"/>
+          </svg>
+        </button>
+        {isOwner ? (
+          <Link
+            href={`/task/${task.id}`}
+            className="text-stone-400 font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M17 17L7 7"/>
-              <path d="M17 7H7v10"/>
-            </svg>
-          </button>
-       </div>
+            ניהול
+          </Link>
+        ) : (
+          <Link
+            href={`/task/${task.id}`}
+            className={`font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${
+              isOffer ? 'text-[#5c6bc0]' : 'text-[#2e7d32]'
+            }`}
+          >
+            לפרטים נוספים
+          </Link>
+        )}
       </div>
+
     </div>
   )
 }
