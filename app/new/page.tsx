@@ -225,21 +225,20 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
         </Field>
 
         <Field label={isTask ? 'מומלץ להוסיף עוד פרטים שיעזרו לשכנים להבין' : 'מומלץ להוסיף כמה מילים שיעזרו לשכנים להבין'}>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={
-               isTask
+  <textarea
+    value={description}
+    onChange={(e) => setDescription(e.target.value)}
+    placeholder={
+      isTask
         ? 'פרטים נוספים שיעזרו לשכנים להבין במה מדובר...'
         : 'כמה מילים על מה שאת/ה מציע/ה...'
     }
+    maxLength={400}
+    rows={3}
+    className="input resize-none"
   />
-            maxLength={400}
-            rows={3}
-            className="input resize-none"
-          />
-          <div className="text-xs text-stone-400 mt-1 text-left">{description.length}/400</div>
-        </Field>
+  <div className="text-xs text-stone-400 mt-1 text-left">{description.length}/400</div>
+</Field>
 
         {/* ── Time — tasks only ── */}
         {isTask && (
