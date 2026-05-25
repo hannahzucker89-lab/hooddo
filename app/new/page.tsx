@@ -242,47 +242,56 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
 
         {/* ── Time — tasks only ── */}
         {isTask && (
-          <Field label="מתי?">
-            <div className="flex gap-2 flex-wrap">
-              {(['מיידי', 'השבוע', 'גמיש'] as TimeOption[]).map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => { setTimeOption(opt); setExactDate('') }}
-                  className={`flex-1 py-3 rounded-full text-sm font-semibold border transition-colors ${
-                    timeOption === opt && !exactDate
-                      ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
-                      : 'bg-white text-stone-600 border-stone-200'
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => setExactDate(new Date().toISOString().split('T')[0])}
-                className={`flex-1 py-3 rounded-xl text-sm font-semibold border transition-colors ${
-                  exactDate
-                    ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
-                    : 'bg-white text-stone-600 border-stone-200'
-                }`}
-              >
-                📅 תאריך
-              </button>
-            </div>
-            {exactDate && (
-              <input
-                type="date"
-                value={exactDate}
-                onChange={(e) => setExactDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="input mt-2"
-                dir="ltr"
-              />
-            )}
-          </Field>
-        )}
-
+  <Field label="מתי?">
+    <div className="flex gap-2 flex-wrap">
+      {(['מיידי', 'השבוע', 'גמיש'] as TimeOption[]).map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => { setTimeOption(opt); setExactDate('') }}
+          className={`flex-1 py-3 rounded-full text-sm font-semibold border transition-colors ${
+            timeOption === opt && !exactDate
+              ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+              : 'bg-white text-stone-600 border-stone-200'
+          }`}
+        >
+          {opt}
+        </button>
+      ))}
+      <button
+        type="button"
+        onClick={() => setExactDate(new Date().toISOString().split('T')[0])}
+        className={`flex-1 py-3 rounded-full text-sm font-semibold border transition-colors ${
+          exactDate
+            ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+            : 'bg-white text-stone-600 border-stone-200'
+        }`}
+      >
+        📅 תאריך
+      </button>
+    </div>
+    {exactDate && (
+      <input
+        type="date"
+        value={exactDate}
+        onChange={(e) => setExactDate(e.target.value)}
+        min={new Date().toISOString().split('T')[0]}
+        className="input mt-2"
+        dir="ltr"
+      />
+    )}
+    {/* מיקרוקופי */}
+    <p className="text-xs text-stone-400 mt-2">
+      {exactDate
+        ? 'הבקשה תישאר באוויר עד סוף היום שנבחר'
+        : timeOption === 'מיידי'
+        ? 'הבקשה תישאר באוויר ל־48 שעות'
+        : timeOption === 'השבוע'
+        ? 'הבקשה תישאר באוויר למשך שבוע'
+        : ''}
+    </p>
+  </Field>
+)}
 
         {/* ── Duration — tasks only ── */}
         {isTask && (
