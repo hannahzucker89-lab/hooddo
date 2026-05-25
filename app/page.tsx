@@ -301,7 +301,7 @@ const filtered = tabFiltered.filter((item) => {
           tab === 'offers' ? 'bg-[#5c6bc0]' : 'bg-[#1b5e20]'
         }`}
       >
-        {tab === 'offers' ? '➕ הצעה חדשה' : '➕ בקשה חדשה'}
+        {tab === 'offers' ? 'הצעה חדשה' : 'בקשה חדשה'}
       </Link>
 
       <style>{`
