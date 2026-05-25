@@ -10,7 +10,7 @@ type ViewerLocation = { lat: number; lng: number }
 type Tab = 'tasks' | 'offers'
 
 const TAB_SUBTITLE: Record<Tab, string> = {
-  tasks: 'בקשות קטנות משכנים מסביבתך',
+  tasks: 'בקשות קטנות שפרסמו שכנים מסביבתך',
   offers: 'דברים ששכנים בסביבתך מציעים',
 }
 
