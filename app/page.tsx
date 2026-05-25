@@ -10,8 +10,8 @@ type ViewerLocation = { lat: number; lng: number }
 type Tab = 'tasks' | 'offers'
 
 const TAB_SUBTITLE: Record<Tab, string> = {
-  tasks: 'בקשות קטנות מהשכונה',
-  offers: 'דברים ששכנים ישמחו לעזור בהם',
+  tasks: 'בקשות קטנות משכנים מסביבתך',
+  offers: 'דברים ששכנים בסביבתך מציעים',
 }
 
 function radiusLabel(meters: number, tab: Tab): string {

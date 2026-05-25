@@ -188,7 +188,8 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
 
         {/* ── Category ── */}
         <Field label="תחום">
-          <div className="flex flex-wrap gap-2">
+  <p className="text-xs text-stone-400 mb-2">יש לבחור תחום</p>
+  <div className="flex flex-wrap gap-2">
             {categories.map(({ emoji, label }) => (
               <button
                 key={label}
@@ -443,15 +444,17 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
           type="button"
           onClick={handleSubmit}
           disabled={isLoading || !category}
-          className="w-full bg-[#1b5e20] text-white font-bold text-lg py-4 rounded-2xl shadow-md active:scale-95 transition-transform disabled:opacity-60"
+          className={`w-full text-white font-bold text-lg py-4 rounded-2xl shadow-md active:scale-95 transition-transform disabled:opacity-60 ${
+  isTask ? 'bg-[#1b5e20]' : 'bg-[#5c6bc0]'
+}`}
         >
           {geocoding
             ? 'מאמת כתובת...'
             : submitting
             ? 'שולח...'
             : isTask
-? 'בקשה חדשה'
-: 'הצעה חדשה'}
+? 'שליחת בקשה לשכונה'
+: 'שליחת הצעה לשכונה'}
         </button>
 
       </div>
