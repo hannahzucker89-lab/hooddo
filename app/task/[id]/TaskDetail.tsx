@@ -156,7 +156,7 @@ export default function TaskDetail() {
         </button>
       </div>
 
-      <div className="bg-white rounded-full border border-stone-100 shadow-sm p-5 mb-4">
+      <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-4">
         <h2 className="text-xl font-bold text-stone-900 mb-4">{task.title}</h2>
 
         {task.description && (
@@ -198,7 +198,7 @@ export default function TaskDetail() {
         <button
           onClick={closeTask}
           disabled={closing || !task.is_active}
-          className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-40"
+          className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-2xl text-sm active:scale-95 transition-transform disabled:opacity-40"
         >
           {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
         </button>
@@ -207,7 +207,7 @@ export default function TaskDetail() {
           href={buildWhatsApp()}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
+          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-2xl shadow-sm active:scale-95 transition-transform text-base"
         >
           {isOffer ? '💬 יצירת קשר' : '💬 יצירת קשר'}
         </a>
