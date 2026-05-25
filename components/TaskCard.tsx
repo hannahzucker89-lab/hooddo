@@ -58,7 +58,10 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
             {task.category}
           </span>
         )}
-        <h2 className="text-base font-semibold leading-snug flex-1">{task.title}</h2>
+        <h2 className="text-base font-semibold leading-snug flex-1">
+  <span className="text-stone-400 font-normal">{task.display_name} · </span>
+  {task.title}
+</h2>
       </div>
 
       {/* ── Description (offers) ── */}
@@ -85,7 +88,6 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
 
       {/* ── Footer ── */}
       <div className="flex items-center justify-between">
-        <span className="text-sm text-stone-400">{task.display_name}</span>
         <div className="flex gap-2">
           
           {isOwner ? (

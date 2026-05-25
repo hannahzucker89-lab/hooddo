@@ -168,7 +168,7 @@ const filtered = tabFiltered.filter((item) => {
 
       {/* ── 4. Tabs + subtitle ── */}
       <div className="mb-4">
-        <div className="flex gap-1.5 bg-stone-100 p-1 rounded-2xl">
+        <div className="flex gap-1 bg-stone-100 p-1 rounded-full mb-2">
           <button
             onClick={() => setTab('tasks')}
             className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
@@ -177,7 +177,7 @@ const filtered = tabFiltered.filter((item) => {
                 : 'text-stone-400'
             }`}
           >
-            🙋 משימות בשכונה
+           בקשות בשכונה
           </button>
           <button
             onClick={() => setTab('offers')}
@@ -187,7 +187,7 @@ const filtered = tabFiltered.filter((item) => {
                 : 'text-stone-400'
             }`}
           >
-            🤝 הצעות בשכונה
+            הצעות בשכונה
           </button>
         </div>
         <p
@@ -301,7 +301,7 @@ const filtered = tabFiltered.filter((item) => {
           tab === 'offers' ? 'bg-[#5c6bc0]' : 'bg-[#1b5e20]'
         }`}
       >
-        {tab === 'offers' ? '➕ פרסום הצעה' : '➕ פרסום משימה'}
+        {tab === 'offers' ? '➕ הצעה חדשה' : '➕ בקשה חדשה'}
       </Link>
 
       <style>{`
@@ -362,14 +362,15 @@ function NearbyEmptyState({ onShowAll, isTask }: { onShowAll: () => void; isTask
 function EmptyState({ isTask }: { isTask: boolean }) {
   return (
     <div className="mt-8 text-center px-2">
-      <p className="text-3xl mb-3">{isTask ? '🙋' : '🤝'}</p>
       <p className="text-stone-500 text-base mb-2">
-        {isTask ? 'אין משימות כרגע באזור שלך.' : 'אין הצעות עזרה כרגע באזור שלך.'}
+        {isTask
+          ? 'אין בקשות כרגע באזור שלך.'
+          : 'אין הצעות כרגע באזור שלך.'}
       </p>
       <p className="text-sm text-stone-400 leading-relaxed mb-5">
         {isTask
-          ? 'אפשר לפרסם משימה ושכנים יוכלו לעזור'
-          : 'אפשר להציע עזרה ושכנים יוכלו לפנות אליך'}
+          ? 'אפשר לפרסם בקשה ושכנים יוכלו לראות.'
+          : 'אפשר לפרסם הצעה ושכנים יוכלו לפנות.'}
       </p>
     </div>
   )
