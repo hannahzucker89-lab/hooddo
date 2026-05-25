@@ -70,7 +70,7 @@ export default function TaskDetail() {
     const isOffer = task.type === 'offer'
     const msg = isOffer
       ? `היי ${task.display_name}, ראיתי את ההצעה שלך ב-HoodDo ואשמח לקבל עזרה 🙏`
-      : `היי ${task.display_name}, ראיתי את המשימה שלך ב-HoodDo ואשמח לעזור 🙏`
+      : `היי ${task.display_name}, ראיתי את הבקשה שלך ב-HoodDo ואשמח לעזור 🙏`
     return `https://wa.me/${task.phone}?text=${encodeURIComponent(msg)}`
   }
 
@@ -116,24 +116,24 @@ export default function TaskDetail() {
       <main className="max-w-md mx-auto px-4 pt-16 text-center">
         <div className="text-5xl mb-4">🎉</div>
         <h1 className="text-2xl font-extrabold text-stone-900 mb-2">
-          {isOffer ? 'ההצעה פורסמה בהצלחה' : 'המשימה פורסמה בהצלחה'}
+          {isOffer ? 'ההצעה נשלחה לשכונה' : 'הבקשה נשלחה לשכונה'}
         </h1>
         <p className="text-stone-500 text-sm mb-8">
           {isOffer
             ? 'שכנים יוכלו לראות את ההצעה שלך ולפנות אליך'
-            : 'שכנים יוכלו לראות את המשימה שלך ולעזור'}
+            : 'שכנים יוכלו לראות את הבקשה שלך ולעזור'}
         </p>
         <button
           onClick={() => router.push('/')}
-          className="w-full bg-[#1b5e20] text-white font-bold py-4 rounded-2xl mb-3"
+          className="w-full bg-[#1b5e20] text-white font-bold py-4 rounded-full mb-3"
         >
           חזרה לפיד
         </button>
         <button
           onClick={() => router.push(`/task/${task.id}`)}
-          className="w-full border border-stone-200 text-stone-600 font-semibold py-3 rounded-2xl text-sm"
+          className="w-full border border-stone-200 text-stone-600 font-semibold py-3 rounded-full text-sm"
         >
-          {isOffer ? 'צפה בהצעה' : 'צפה במשימה'}
+          {isOffer ? 'צפה בהצעה' : 'צפה בבקשה'}
         </button>
       </main>
     )
@@ -146,7 +146,7 @@ export default function TaskDetail() {
       <div className="pt-6 pb-4 flex items-center gap-3">
         <button onClick={() => router.back()} className="text-stone-400 text-2xl leading-none">‹</button>
         <h1 className="text-lg font-extrabold text-stone-900 flex-1">
-          {isOwner ? 'ניהול' : isOffer ? 'פרטי הצעה' : 'פרטי משימה'}
+          {isOwner ? 'ניהול' : isOffer ? 'פרטי ההצעה' : 'פרטי הבקשה'}
         </h1>
         <button
           onClick={handleShare}
@@ -200,7 +200,7 @@ export default function TaskDetail() {
           disabled={closing || !task.is_active}
           className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-2xl text-sm active:scale-95 transition-transform disabled:opacity-40"
         >
-          {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת משימה'}
+          {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
         </button>
       ) : task.is_active ? (
         <a
@@ -209,7 +209,7 @@ export default function TaskDetail() {
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-2xl shadow-sm active:scale-95 transition-transform text-base"
         >
-          {isOffer ? '💬 שליחת הודעה' : '💬 רוצה לעזור'}
+          {isOffer ? '💬 יצירת קשר' : '💬 יצירת קשר'}
         </a>
       ) : (
         <div className="text-center text-stone-400 text-sm py-4">הפריט כבר לא פעיל</div>

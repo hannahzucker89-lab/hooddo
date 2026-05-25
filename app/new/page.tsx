@@ -249,7 +249,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
                   key={opt}
                   type="button"
                   onClick={() => { setTimeOption(opt); setExactDate('') }}
-                  className={`flex-1 py-3 rounded-xl text-sm font-semibold border transition-colors ${
+                  className={`flex-1 py-3 rounded-full text-sm font-semibold border transition-colors ${
                     timeOption === opt && !exactDate
                       ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
                       : 'bg-white text-stone-600 border-stone-200'
@@ -293,7 +293,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
                   key={d}
                   type="button"
                   onClick={() => setDuration(String(d))}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
+                  className={`flex-1 py-2.5 rounded-full text-sm font-semibold border transition-colors ${
                     duration === String(d)
                       ? 'bg-stone-800 text-white border-stone-800'
                       : 'bg-white text-stone-600 border-stone-200'
