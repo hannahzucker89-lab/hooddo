@@ -87,42 +87,42 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
       </div>
 
       {/* ── Footer ── */}
-      <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-stone-100">
-        <button
-          onClick={async (e) => {
-            e.preventDefault()
-            const url = `${window.location.origin}/task/${task.id}`
-            if (navigator.share) {
-              await navigator.share({ title: task.title, url })
-            } else {
-              await navigator.clipboard.writeText(url)
-            }
-          }}
-          className="text-stone-300 text-xs px-2 py-1.5 rounded-lg active:scale-95 transition-transform"
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M17 17L7 7"/>
-            <path d="M17 7H7v10"/>
-          </svg>
-        </button>
-        {isOwner ? (
-          <Link
-            href={`/task/${task.id}`}
-            className="text-stone-400 font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
-          >
-            ניהול
-          </Link>
-        ) : (
-          <Link
-            href={`/task/${task.id}`}
-            className={`font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${
-              isOffer ? 'text-[#5c6bc0]' : 'text-[#2e7d32]'
-            }`}
-          >
-            לפרטים נוספים
-          </Link>
-        )}
-      </div>
+<div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-stone-100">
+  {isOwner ? (
+    <Link
+      href={`/task/${task.id}`}
+      className="text-stone-400 font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
+    >
+      ניהול
+    </Link>
+  ) : (
+    <Link
+      href={`/task/${task.id}`}
+      className={`font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${
+        isOffer ? 'text-[#5c6bc0]' : 'text-[#2e7d32]'
+      }`}
+    >
+      לפרטים נוספים
+    </Link>
+  )}
+  <button
+    onClick={async (e) => {
+      e.preventDefault()
+      const url = `${window.location.origin}/task/${task.id}`
+      if (navigator.share) {
+        await navigator.share({ title: task.title, url })
+      } else {
+        await navigator.clipboard.writeText(url)
+      }
+    }}
+    className="text-stone-300 text-xs px-2 py-1.5 rounded-lg active:scale-95 transition-transform"
+  >
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 17L7 7"/>
+      <path d="M17 7H7v10"/>
+    </svg>
+  </button>
+</div>
 
     </div>
   )
