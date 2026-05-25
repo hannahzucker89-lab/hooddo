@@ -171,7 +171,7 @@ const filtered = tabFiltered.filter((item) => {
         <div className="flex gap-1 bg-stone-100 p-1 rounded-full mb-2">
           <button
             onClick={() => setTab('tasks')}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
+            className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
               tab === 'tasks'
                 ? 'bg-white text-[#1b5e20] shadow-sm'
                 : 'text-stone-400'
@@ -181,7 +181,7 @@ const filtered = tabFiltered.filter((item) => {
           </button>
           <button
             onClick={() => setTab('offers')}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
+            className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
               tab === 'offers'
                 ? 'bg-white text-[#5c6bc0] shadow-sm'
                 : 'text-stone-400'
