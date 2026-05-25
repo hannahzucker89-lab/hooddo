@@ -198,7 +198,7 @@ export default function TaskDetail() {
         <button
           onClick={closeTask}
           disabled={closing || !task.is_active}
-          className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-2xl text-sm active:scale-95 transition-transform disabled:opacity-40"
+          className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-40"
         >
           {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
         </button>
