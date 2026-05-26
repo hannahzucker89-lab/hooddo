@@ -34,7 +34,7 @@ function SpeechBubble({ hint, onDismiss, anchorRef }: {
   useEffect(() => {
   if (anchorRef.current) {
     const rect = anchorRef.current.getBoundingClientRect()
-    const offset = hint === 'distance' ? 12 : hint === 'tabs-tasks' || hint === 'tabs-offers' ? 8 : -20
+    const offset = hint === 'distance' ? 12 : hint === 'tabs-tasks' || hint === 'tabs-offers' ? -8 : -30
     setTop(rect.bottom + offset)
   }
 }, [anchorRef, hint])
