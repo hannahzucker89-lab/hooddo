@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { supabase, type Task, CATEGORIES_LIST } from '@/lib/supabase'
 import TaskCard from '@/components/TaskCard'
 import { calculateDistanceMeters } from '@/utils/distance'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 type ViewerLocation = { lat: number; lng: number }
 type Tab = 'tasks' | 'offers'
@@ -24,18 +25,26 @@ function radiusLabel(meters: number, tab: Tab): string {
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
 
-function SpeechBubble({ hint, onDismiss }: {
+function SpeechBubble({ hint, onDismiss, anchorRef }: {
   hint: 'tabs-tasks' | 'tabs-offers' | 'distance' | 'filter'
   onDismiss: () => void
+  anchorRef: React.RefObject<HTMLElement | HTMLDivElement>
 }) {
-  const config = {
-    'distance': { text: 'אפשר לבחור את המרחק שנוח לך', top: '148px' },
-    'tabs-tasks': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
-    'tabs-offers': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
-    'filter': { text: 'אפשר לסנן לפי מה שרלוונטי לך', top: '310px' },
-  }
+  const [top, setTop] = useState(200)
 
-  const { text, top } = config[hint]
+  useEffect(() => {
+    if (anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect()
+      setTop(rect.bottom + 8)
+    }
+  }, [anchorRef])
+
+  const text = {
+    'distance': 'אפשר לבחור את המרחק שנוח לך',
+    'tabs-tasks': 'אפשר לעבור בין בקשות להצעות',
+    'tabs-offers': 'אפשר לעבור בין בקשות להצעות',
+    'filter': 'אפשר לסנן לפי מה שרלוונטי לך',
+  }[hint]
 
   return (
     <div
@@ -46,10 +55,10 @@ function SpeechBubble({ hint, onDismiss }: {
     >
       <div
         className="absolute"
-        style={{ top, right: '24px', left: '24px' }}
+        style={{ top: `${top}px`, left: '50%', transform: 'translateX(-50%)', width: '240px' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-center">
+        <div className="flex justify-center mb-0">
           <div style={{
             width: 0, height: 0,
             borderLeft: '8px solid transparent',
@@ -63,11 +72,12 @@ function SpeechBubble({ hint, onDismiss }: {
         >
           <p className="text-sm text-stone-700 flex-1">{text}</p>
           <button
-            onClick={onDismiss}
-            className="text-xs font-bold text-[#1b5e20] shrink-0 active:scale-95 transition-transform"
-          >
-            הבנתי
-          </button>
+  onClick={onDismiss}
+  className="text-xs font-bold text-[#1b5e20] shrink-0 active:scale-95 transition-transform whitespace-nowrap"
+>
+  הבנתי ↑
+</button>
+
         </div>
       </div>
     </div>
@@ -86,6 +96,9 @@ export default function HomePage() {
   const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
   const [showFilters, setShowFilters] = useState(false)
   const [hint, setHint] = useState<'tabs-tasks' | 'tabs-offers' | 'distance' | 'filter' | null>(null)
+const sliderRef = useRef<HTMLDivElement>(null)
+const tabsRef = useRef<HTMLDivElement>(null)
+const filterRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -190,7 +203,7 @@ export default function HomePage() {
       <div className="mb-4" />
 
       {/* ── Location + radius strip ── */}
-      <div className="mb-4 px-1">
+      <div className="mb-4 px-1" ref={sliderRef}>
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-stone-400">
             {locationLoading
@@ -233,7 +246,7 @@ export default function HomePage() {
       </div>
 
       {/* ── Tabs ── */}
-      <div className="mb-4">
+      <div className="mb-4" ref={tabsRef}>
         <div className="flex gap-1 bg-stone-100 p-1 rounded-full mb-2">
           <button
             onClick={() => setTab('tasks')}
@@ -264,6 +277,7 @@ export default function HomePage() {
         </p>
 
      <button
+  ref={filterRef}
           onClick={() => setShowFilters(prev => !prev)}
           className={`flex items-center gap-1 text-xs mt-2 px-3 py-1 rounded-full border transition-colors w-full justify-center ${
             showFilters || selectedCategories.length > 0 || rewardFilter !== 'all'
@@ -400,7 +414,15 @@ export default function HomePage() {
       `}</style>
 
 {hint && (
-  <SpeechBubble hint={hint} onDismiss={dismissHint} />
+  <SpeechBubble
+    hint={hint}
+    onDismiss={dismissHint}
+    anchorRef={
+      hint === 'distance' ? sliderRef :
+      hint === 'filter' ? filterRef :
+      tabsRef
+    }
+  />
 )}
 
     </main>
