@@ -24,42 +24,71 @@ function radiusLabel(meters: number, tab: Tab): string {
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
 
-function HintOverlay({ hint, onDismiss }: { 
-  hint: 'tabs-tasks' | 'tabs-offers' | 'distance'; 
-  onDismiss: () => void 
+function SpeechBubble({ hint, onDismiss }: {
+  hint: 'tabs-tasks' | 'tabs-offers' | 'distance' | 'filter'
+  onDismiss: () => void
 }) {
-  const isDistance = hint === 'distance'
+  const config = {
+    'distance': {
+      text: 'אפשר לבחור את המרחק שנוח לך',
+      top: '155px',
+      tailTop: true,
+    },
+    'tabs-tasks': {
+      text: 'אפשר לעבור בין בקשות להצעות',
+      top: '255px',
+      tailTop: true,
+    },
+    'tabs-offers': {
+      text: 'אפשר לעבור בין בקשות להצעות',
+      top: '255px',
+      tailTop: true,
+    },
+    'filter': {
+      text: 'אפשר לסנן לפי מה שרלוונטי לך',
+      top: '355px',
+      tailTop: true,
+    },
+  }
+
+  const { text, top, tailTop } = config[hint]
 
   return (
     <div
       className="fixed inset-0 z-50"
-      style={{ background: 'rgba(0,0,0,0.25)', animation: 'fadeIn 0.3s ease' }}
+      style={{ background: 'rgba(0,0,0,0.15)', animation: 'fadeIn 0.25s ease' }}
       onClick={onDismiss}
       dir="rtl"
     >
       <div
-        className="absolute left-0 right-0"
-        style={{ top: isDistance ? '120px' : '210px' }}
+        className="absolute right-6 left-6"
+        style={{ top }}
         onClick={(e) => e.stopPropagation()}
       >
-        <p className="text-center text-white text-sm font-medium mb-3 px-6 drop-shadow">
-          {isDistance
-            ? 'אפשר לבחור את המרחק שנוח לך'
-            : 'אפשר לעבור בין בקשות להצעות'}
-        </p>
+        {/* זנב למעלה */}
+        {tailTop && (
+          <div className="flex justify-center mb-0">
+            <div style={{
+              width: 0, height: 0,
+              borderLeft: '10px solid transparent',
+              borderRight: '10px solid transparent',
+              borderBottom: '10px solid white',
+              filter: 'drop-shadow(0 -1px 1px rgba(0,0,0,0.08))',
+            }} />
+          </div>
+        )}
+
+        {/* הבועה */}
         <div
-          className="mx-4 rounded-2xl"
-          style={{ 
-            background: 'rgba(255,255,255,0.12)',
-            border: '1.5px solid rgba(255,255,255,0.4)',
-            padding: '10px',
+          className="bg-white rounded-2xl px-5 py-4 flex items-center justify-between gap-4"
+          style={{
+            boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
           }}
-        />
-        <div className="flex justify-center mt-4">
+        >
+          <p className="text-sm text-stone-700 leading-relaxed flex-1">{text}</p>
           <button
             onClick={onDismiss}
-            className="text-white text-xs font-semibold px-5 py-2 rounded-full active:scale-95 transition-transform"
-            style={{ background: 'rgba(255,255,255,0.2)' }}
+            className="text-xs font-bold text-[#1b5e20] shrink-0 active:scale-95 transition-transform"
           >
             הבנתי
           </button>
@@ -68,7 +97,6 @@ function HintOverlay({ hint, onDismiss }: {
     </div>
   )
 }
-
 
 export default function HomePage() {
   const [allItems, setAllItems] = useState<Task[]>([])
@@ -81,18 +109,20 @@ export default function HomePage() {
   const [radius, setRadius] = useState(500)
   const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
   const [showFilters, setShowFilters] = useState(false)
-  const [hint, setHint] = useState<'tabs-tasks' | 'tabs-offers' | 'distance' | null>(null)
+  const [hint, setHint] = useState<'tabs-tasks' | 'tabs-offers' | 'distance' | 'filter' | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const done = localStorage.getItem(HINT_KEY)
-      if (!done) setHint('tabs-tasks')
+      if (!done) setHint('distance')
     }
   }, [])
 
   function dismissHint() {
-  if (hint === 'tabs-tasks' || hint === 'tabs-offers') {
-    setHint('distance')
+  if (hint === 'distance') {
+    setHint('tabs-tasks')
+  } else if (hint === 'tabs-tasks' || hint === 'tabs-offers') {
+    setHint('filter')
   } else {
     setHint(null)
     localStorage.setItem(HINT_KEY, 'true')
@@ -394,8 +424,8 @@ export default function HomePage() {
       `}</style>
 
 {hint && (
-        <HintOverlay hint={hint} onDismiss={dismissHint} />
-      )}
+  <SpeechBubble hint={hint} onDismiss={dismissHint} />
+)}
 
     </main>
   )
