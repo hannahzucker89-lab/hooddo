@@ -29,29 +29,13 @@ function SpeechBubble({ hint, onDismiss }: {
   onDismiss: () => void
 }) {
   const config = {
-    'distance': {
-      text: 'אפשר לבחור את המרחק שנוח לך',
-      top: '155px',
-      tailTop: true,
-    },
-    'tabs-tasks': {
-      text: 'אפשר לעבור בין בקשות להצעות',
-      top: '255px',
-      tailTop: true,
-    },
-    'tabs-offers': {
-      text: 'אפשר לעבור בין בקשות להצעות',
-      top: '255px',
-      tailTop: true,
-    },
-    'filter': {
-      text: 'אפשר לסנן לפי מה שרלוונטי לך',
-      top: '355px',
-      tailTop: true,
-    },
+    'distance': { text: 'אפשר לבחור את המרחק שנוח לך', top: '148px' },
+    'tabs-tasks': { text: 'אפשר לעבור בין בקשות להצעות', top: '248px' },
+    'tabs-offers': { text: 'אפשר לעבור בין בקשות להצעות', top: '248px' },
+    'filter': { text: 'אפשר לסנן לפי מה שרלוונטי לך', top: '340px' },
   }
 
-  const { text, top, tailTop } = config[hint]
+  const { text, top } = config[hint]
 
   return (
     <div
@@ -61,31 +45,26 @@ function SpeechBubble({ hint, onDismiss }: {
       dir="rtl"
     >
       <div
-        className="absolute right-6 left-6"
-        style={{ top }}
+        className="absolute"
+        style={{ top, right: '16px', left: '16px', maxWidth: '320px', margin: '0 auto' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* זנב למעלה */}
-        {tailTop && (
-          <div className="flex justify-center mb-0">
-            <div style={{
-              width: 0, height: 0,
-              borderLeft: '10px solid transparent',
-              borderRight: '10px solid transparent',
-              borderBottom: '10px solid white',
-              filter: 'drop-shadow(0 -1px 1px rgba(0,0,0,0.08))',
-            }} />
-          </div>
-        )}
+        {/* זנב */}
+        <div className="flex justify-center">
+          <div style={{
+            width: 0, height: 0,
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderBottom: '8px solid white',
+          }} />
+        </div>
 
-        {/* הבועה */}
+        {/* בועה */}
         <div
-          className="bg-white rounded-2xl px-5 py-4 flex items-center justify-between gap-4"
-          style={{
-            boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
-          }}
+          className="bg-white rounded-2xl px-4 py-3 flex items-center justify-between gap-3"
+          style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
         >
-          <p className="text-sm text-stone-700 leading-relaxed flex-1">{text}</p>
+          <p className="text-sm text-stone-700 flex-1">{text}</p>
           <button
             onClick={onDismiss}
             className="text-xs font-bold text-[#1b5e20] shrink-0 active:scale-95 transition-transform"
