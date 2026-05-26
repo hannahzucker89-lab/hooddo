@@ -25,11 +25,10 @@ function radiusLabel(meters: number, tab: Tab): string {
 }
 
 function Hint({ title, body, onDismiss, type = 'tasks' }: { 
-  title: string; body: string; onDismiss: () => void; type?: 'tasks' | 'distance'
+  title: string; body: string; onDismiss: () => void; type?: 'tasks' | 'offers' | 'distance'
 }) {
-  type?: 'tasks' | 'offers' | 'distance'
-const color = type === 'tasks' ? '#1b5e20' : type === 'offers' ? '#5c6bc0' : '#a8a29e'
-const border = type === 'tasks' ? '#a5d6a7' : type === 'offers' ? '#c5c6f7' : '#e7e5e4'
+  const color = type === 'tasks' ? '#1b5e20' : type === 'offers' ? '#5c6bc0' : '#a8a29e'
+  const border = type === 'tasks' ? '#a5d6a7' : type === 'offers' ? '#c5c6f7' : '#e7e5e4'
 
   return (
     <div className="relative flex justify-center" dir="rtl">
