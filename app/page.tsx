@@ -24,33 +24,24 @@ function radiusLabel(meters: number, tab: Tab): string {
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
 
-function Hint({ title, body, onDismiss, type = 'tasks' }: { 
-  title: string; body: string; onDismiss: () => void; type?: 'tasks' | 'offers' | 'distance'
-}) {
-  const color = type === 'tasks' ? '#1b5e20' : type === 'offers' ? '#5c6bc0' : '#a8a29e'
-  const border = type === 'tasks' ? '#a5d6a7' : type === 'offers' ? '#c5c6f7' : '#e7e5e4'
-
+function Hint({ text, onDismiss }: { text: string; onDismiss: () => void }) {
   return (
-    <div className="relative flex justify-center" dir="rtl">
-      <div className="absolute left-1/2 -translate-x-1/2 -top-2 w-0 h-0" style={{
-  borderLeft: '8px solid transparent',
-  borderRight: '8px solid transparent',
-  borderBottom: `8px solid ${border}`,
-}} />
-      <div
-        className="bg-white rounded-2xl px-4 py-3 shadow-lg border w-4/5"
-        style={{ borderColor: border, animation: 'fadeIn 0.25s ease' }}
+    <div
+      className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl"
+      style={{
+        background: 'rgba(255,255,255,0.85)',
+        backdropFilter: 'blur(4px)',
+        animation: 'fadeIn 0.3s ease',
+      }}
+      dir="rtl"
+    >
+      <span className="text-xs text-stone-500 leading-relaxed">{text}</span>
+      <button
+        onClick={onDismiss}
+        className="text-xs text-stone-400 font-medium shrink-0 underline active:scale-95 transition-transform"
       >
-        <p className="text-sm font-bold mb-0.5" style={{ color }}>{title}</p>
-        <p className="text-xs leading-relaxed mb-2 text-stone-500">{body}</p>
-        <button
-          onClick={onDismiss}
-          className="text-xs font-semibold active:scale-95 transition-transform"
-          style={{ color }}
-        >
-          הבנתי
-        </button>
-      </div>
+        הבנתי
+      </button>
     </div>
   )
 }
@@ -76,11 +67,7 @@ export default function HomePage() {
   }, [])
 
   function dismissHint() {
-  if (hint === 'tabs-tasks') {
-    setTab('offers')
-    setHint('tabs-offers')
-  } else if (hint === 'tabs-offers') {
-    setTab('tasks')
+  if (hint === 'tabs-tasks' || hint === 'tabs-offers') {
     setHint('distance')
   } else {
     setHint(null)
@@ -213,14 +200,11 @@ export default function HomePage() {
           <span className="text-xs text-stone-300">200 מ׳</span>
         </div>
 
-        {/* Hint 2 — distance */}
         {hint === 'distance' && (
-  <div className="mt-3">
+  <div className="mb-2">
     <Hint
-      title="רק דברים קרובים אליך"
-      body="אפשר לבחור כמה רחוק לראות בקשות והצעות בסביבה שלך"
+      text="⬆️ כאן בוחרים את המרחק שנוח לך"
       onDismiss={dismissHint}
-      type="distance"
     />
   </div>
 )}
@@ -257,16 +241,11 @@ export default function HomePage() {
           {TAB_SUBTITLE[tab]}
         </p>
 
-        {/* Hint 1 — tabs */}
         {(hint === 'tabs-tasks' || hint === 'tabs-offers') && (
-  <div className="mt-2">
+  <div className="mb-2">
     <Hint
-      title="אפשר גם לבקש וגם להציע"
-      body={hint === 'tabs-tasks' 
-        ? 'הטאב הזה מציג בקשות מהשכונה שלך'
-        : 'הטאב הזה מציג הצעות מהשכונה שלך'}
+      text="⬆️ כאן אפשר לעבור בין פיד הבקשות לפיד ההצעות"
       onDismiss={dismissHint}
-      type={hint === 'tabs-tasks' ? 'tasks' : 'offers'}
     />
   </div>
 )}
