@@ -14,12 +14,34 @@ const TAB_SUBTITLE: Record<Tab, string> = {
   offers: 'דברים ששכנים בסביבתך מציעים',
 }
 
+const HINT_KEY = 'hooddo_hints_done_v2'
+
 function radiusLabel(meters: number, tab: Tab): string {
   const type = tab === 'tasks' ? 'משימות' : 'הצעות'
   if (meters < 1000) return `${type} עד ${meters} מ׳ ממך`
   const km = meters / 1000
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
+
+function Hint({ title, body, onDismiss }: { title: string; body: string; onDismiss: () => void }) {
+  return (
+    <div
+      className="bg-white border border-stone-200 rounded-2xl px-4 py-3 shadow-md mb-3"
+      style={{ animation: 'fadeIn 0.25s ease' }}
+      dir="rtl"
+    >
+      <p className="text-sm font-bold text-stone-800 mb-0.5">{title}</p>
+      <p className="text-xs text-stone-500 leading-relaxed mb-2">{body}</p>
+      <button
+        onClick={onDismiss}
+        className="text-xs font-semibold text-[#1b5e20] active:scale-95 transition-transform"
+      >
+        הבנתי
+      </button>
+    </div>
+  )
+}
+
 export default function HomePage() {
   const [allItems, setAllItems] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
@@ -29,8 +51,25 @@ export default function HomePage() {
   const [locationLoading, setLocationLoading] = useState(false)
   const [locationDenied, setLocationDenied] = useState(false)
   const [radius, setRadius] = useState(500)
-const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
-const [showFilters, setShowFilters] = useState(false)
+  const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
+  const [showFilters, setShowFilters] = useState(false)
+  const [hint, setHint] = useState<'tabs' | 'distance' | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const done = localStorage.getItem(HINT_KEY)
+      if (!done) setHint('tabs')
+    }
+  }, [])
+
+  function dismissHint() {
+    if (hint === 'tabs') {
+      setHint('distance')
+    } else {
+      setHint(null)
+      localStorage.setItem(HINT_KEY, 'true')
+    }
+  }
 
   useEffect(() => { fetchAll() }, [])
 
@@ -59,27 +98,28 @@ const [showFilters, setShowFilters] = useState(false)
   }, [])
 
   useEffect(() => { requestLocation() }, [requestLocation])
-function toggleCategory(label: string) {
+
+  function toggleCategory(label: string) {
     setSelectedCategories(prev =>
       prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label]
     )
   }
+
   function isExpired(item: Task): boolean {
     const created = new Date(item.created_at).getTime()
     const now = Date.now()
     const hours = (now - created) / (1000 * 60 * 60)
-
-    if (item.time_option === 'מיידי') return hours > 24
-    if (item.time_option === 'השבוע') return hours > 24 * 7
+    if (item.time_option === 'מיידי') return hours > 25
+    if (item.time_option === 'השבוע') return hours > 24 * 8
     if (item.exact_date) return new Date(item.exact_date) < new Date(new Date().toDateString())
-    return false // גמיש — לא נעלם
+    return false
   }
 
   const tabFiltered = allItems.filter((item) =>
     (tab === 'tasks' ? item.type === 'task' : item.type === 'offer') && !isExpired(item)
   )
 
-const filtered = tabFiltered.filter((item) => {
+  const filtered = tabFiltered.filter((item) => {
     if (selectedCategories.length > 0 && !selectedCategories.includes(item.category ?? '')) return false
     return true
   })
@@ -105,7 +145,7 @@ const filtered = tabFiltered.filter((item) => {
   return (
     <main className="max-w-md mx-auto px-4 pb-28">
 
-      {/* ── 1. Logo ── */}
+      {/* ── Logo ── */}
       <div className="pt-8 pb-0">
         <h1 className="text-2xl font-extrabold tracking-tight text-stone-900">HoodDo 🏘️</h1>
         <p className="text-sm font-medium text-stone-600 mt-1 mb-0">
@@ -117,8 +157,6 @@ const filtered = tabFiltered.filter((item) => {
 
       {/* ── Location + radius strip ── */}
       <div className="mb-4 px-1">
-
-        {/* Location row */}
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-stone-400">
             {locationLoading
@@ -128,10 +166,7 @@ const filtered = tabFiltered.filter((item) => {
               : '📍 מיקום לא הוגדר'}
           </span>
           {viewerLocation ? (
-            <button
-              onClick={() => setViewerLocation(null)}
-              className="text-xs text-stone-400 underline"
-            >
+            <button onClick={() => setViewerLocation(null)} className="text-xs text-stone-400 underline">
               נקה
             </button>
           ) : (
@@ -144,7 +179,6 @@ const filtered = tabFiltered.filter((item) => {
           )}
         </div>
 
-        {/* Slider */}
         <input
           type="range"
           min={200}
@@ -156,40 +190,45 @@ const filtered = tabFiltered.filter((item) => {
           style={{ direction: 'rtl' }}
         />
 
-        {/* Radius label with min/max */}
         <div className="flex items-center justify-between mt-1">
           <span className="text-xs text-stone-300">2 ק״מ</span>
           <span className="text-xs text-stone-400">{radiusLabel(radius, tab)}</span>
           <span className="text-xs text-stone-300">200 מ׳</span>
         </div>
 
+        {/* Hint 2 — distance */}
+        {hint === 'distance' && (
+          <div className="mt-3">
+            <Hint
+              title="רק דברים קרובים אליך"
+              body="אפשר לבחור כמה רחוק לראות בקשות והצעות בסביבה שלך"
+              onDismiss={dismissHint}
+            />
+          </div>
+        )}
       </div>
-     
 
-      {/* ── 4. Tabs + subtitle ── */}
+      {/* ── Tabs ── */}
       <div className="mb-4">
         <div className="flex gap-1 bg-stone-100 p-1 rounded-full mb-2">
           <button
             onClick={() => setTab('tasks')}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              tab === 'tasks'
-                ? 'bg-white text-[#1b5e20] shadow-sm'
-                : 'text-stone-400'
+              tab === 'tasks' ? 'bg-white text-[#1b5e20] shadow-sm' : 'text-stone-400'
             }`}
           >
-           בקשות בשכונה
+            בקשות בשכונה
           </button>
           <button
             onClick={() => setTab('offers')}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
-              tab === 'offers'
-                ? 'bg-white text-[#5c6bc0] shadow-sm'
-                : 'text-stone-400'
+              tab === 'offers' ? 'bg-white text-[#5c6bc0] shadow-sm' : 'text-stone-400'
             }`}
           >
             הצעות בשכונה
           </button>
         </div>
+
         <p
           key={tab}
           className={`text-xs text-center mt-1.5 transition-opacity ${
@@ -199,7 +238,19 @@ const filtered = tabFiltered.filter((item) => {
         >
           {TAB_SUBTITLE[tab]}
         </p>
-<button
+
+        {/* Hint 1 — tabs */}
+        {hint === 'tabs' && (
+          <div className="mt-2">
+            <Hint
+              title="אפשר גם לבקש וגם להציע"
+              body="מעבר בין הטאבים יציג בקשות או הצעות מהשכונה שלך"
+              onDismiss={dismissHint}
+            />
+          </div>
+        )}
+
+        <button
           onClick={() => setShowFilters(prev => !prev)}
           className={`flex items-center gap-1 text-xs mt-2 px-3 py-1 rounded-full border transition-colors w-full justify-center ${
             showFilters || selectedCategories.length > 0 || rewardFilter !== 'all'
@@ -216,58 +267,57 @@ const filtered = tabFiltered.filter((item) => {
         </button>
       </div>
 
-{showFilters && (
-  <div>
-      <div className="mb-4 overflow-x-auto">
-        <div className="flex gap-2 pb-1" style={{ width: 'max-content' }}>
-          <button
-            onClick={() => setSelectedCategories([])}
-            className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors ${
-              selectedCategories.length === 0
-                ? 'bg-stone-800 text-white border-stone-800'
-                : 'bg-white text-stone-500 border-stone-200'
-            }`}
-          >
-            הכל
-          </button>
-          {CATEGORIES_LIST.map(({ emoji, label }) => (
-            <button
-              key={label}
-              onClick={() => toggleCategory(label)}
-              className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors ${
-                selectedCategories.includes(label)
-                  ? tab === 'offers'
-                    ? 'bg-[#5c6bc0] text-white border-[#5c6bc0]'
-                    : 'bg-[#1b5e20] text-white border-[#1b5e20]'
-                  : 'bg-white text-stone-500 border-stone-200'
-              }`}
-            >
-              {emoji} {label}
-            </button>
-          ))}
+      {showFilters && (
+        <div>
+          <div className="mb-4 overflow-x-auto">
+            <div className="flex gap-2 pb-1" style={{ width: 'max-content' }}>
+              <button
+                onClick={() => setSelectedCategories([])}
+                className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors ${
+                  selectedCategories.length === 0
+                    ? 'bg-stone-800 text-white border-stone-800'
+                    : 'bg-white text-stone-500 border-stone-200'
+                }`}
+              >
+                הכל
+              </button>
+              {CATEGORIES_LIST.map(({ emoji, label }) => (
+                <button
+                  key={label}
+                  onClick={() => toggleCategory(label)}
+                  className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors ${
+                    selectedCategories.includes(label)
+                      ? tab === 'offers'
+                        ? 'bg-[#5c6bc0] text-white border-[#5c6bc0]'
+                        : 'bg-[#1b5e20] text-white border-[#1b5e20]'
+                      : 'bg-white text-stone-500 border-stone-200'
+                  }`}
+                >
+                  {emoji} {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-2 mb-4">
+            {([['all', 'הכל'], ['paid', '₪ בתשלום'], ['free', '🤝 ללא תמורה']] as ['all' | 'paid' | 'free', string][]).map(([val, lbl]) => (
+              <button
+                key={val}
+                onClick={() => setRewardFilter(val)}
+                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                  rewardFilter === val
+                    ? 'bg-stone-600 text-white border-stone-600'
+                    : 'bg-white text-stone-400 border-stone-200'
+                }`}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-{/* ── Reward filter ── */}
-      <div className="flex gap-2 mb-4">
-        {([['all', 'הכל'], ['paid', '₪ בתשלום'], ['free', '🤝 ללא תמורה']] as ['all' | 'paid' | 'free', string][]).map(([val, lbl]) => (
-          <button
-            key={val}
-            onClick={() => setRewardFilter(val)}
-            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-              rewardFilter === val
-                ? 'bg-stone-600 text-white border-stone-600'
-                : 'bg-white text-stone-400 border-stone-200'
-            }`}
-          >
-            {lbl}
-          </button>
-        ))}
-      </div>
-  </div>
-)}
-
-      {/* ── 5. Feed ── */}
+      {/* ── Feed ── */}
       {loading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
@@ -279,19 +329,16 @@ const filtered = tabFiltered.filter((item) => {
       ) : enriched.length === 0 ? (
         <EmptyState isTask={isTask} />
       ) : (
-        <>
-          
-          <div className="space-y-3">
-            {enriched.map(({ item, dist }, index) => (
-              <TaskCard
-                key={item.id}
-                task={item}
-                distanceMeters={dist ?? undefined}
-                highlight={index === 0}
-              />
-            ))}
-          </div>
-        </>
+        <div className="space-y-3">
+          {enriched.map(({ item, dist }, index) => (
+            <TaskCard
+              key={item.id}
+              task={item}
+              distanceMeters={dist ?? undefined}
+              highlight={index === 0}
+            />
+          ))}
+        </div>
       )}
 
       {/* ── FAB ── */}
@@ -347,11 +394,11 @@ function NearbyEmptyState({ onShowAll, isTask }: { onShowAll: () => void; isTask
   return (
     <div className="mt-6 text-center px-2">
       <p className="text-stone-500 text-base mb-3">
-        {isTask ? 'כרגע אין משימות בטווח הזה.' : 'כרגע אין הצעות בטווח הזה.'}
+        {isTask ? 'כרגע אין בקשות בטווח הזה.' : 'כרגע אין הצעות בטווח הזה.'}
       </p>
       <button
         onClick={onShowAll}
-        className="inline-flex items-center justify-center gap-2 border border-stone-300 text-stone-600 font-semibold px-6 py-3 rounded-2xl text-sm active:scale-95 transition-transform"
+        className="inline-flex items-center justify-center gap-2 border border-stone-300 text-stone-600 font-semibold px-6 py-3 rounded-full text-sm active:scale-95 transition-transform"
       >
         הצג הכל באזור
       </button>
@@ -363,9 +410,7 @@ function EmptyState({ isTask }: { isTask: boolean }) {
   return (
     <div className="mt-8 text-center px-2">
       <p className="text-stone-500 text-base mb-2">
-        {isTask
-          ? 'אין בקשות כרגע באזור שלך.'
-          : 'אין הצעות כרגע באזור שלך.'}
+        {isTask ? 'אין בקשות כרגע באזור שלך.' : 'אין הצעות כרגע באזור שלך.'}
       </p>
       <p className="text-sm text-stone-400 leading-relaxed mb-5">
         {isTask
