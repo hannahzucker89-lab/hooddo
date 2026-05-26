@@ -23,21 +23,34 @@ function radiusLabel(meters: number, tab: Tab): string {
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
 
-function Hint({ title, body, onDismiss }: { title: string; body: string; onDismiss: () => void }) {
+function Hint({ title, body, onDismiss, type = 'tasks' }: { 
+  title: string; body: string; onDismiss: () => void; type?: 'tasks' | 'distance'
+}) {
+  const color = type === 'tasks' ? '#1b5e20' : '#5c6bc0'
+  const bg = type === 'tasks' ? '#f0faf1' : '#f0f0ff'
+  const border = type === 'tasks' ? '#a5d6a7' : '#c5c6f7'
+
   return (
-    <div
-      className="bg-white border border-stone-200 rounded-2xl px-4 py-3 shadow-md mb-3"
-      style={{ animation: 'fadeIn 0.25s ease' }}
-      dir="rtl"
-    >
-      <p className="text-sm font-bold text-stone-800 mb-0.5">{title}</p>
-      <p className="text-xs text-stone-500 leading-relaxed mb-2">{body}</p>
-      <button
-        onClick={onDismiss}
-        className="text-xs font-semibold text-[#1b5e20] active:scale-95 transition-transform"
+    <div className="relative" dir="rtl">
+      <div className="absolute right-6 -top-2 w-0 h-0" style={{
+        borderLeft: '8px solid transparent',
+        borderRight: '8px solid transparent',
+        borderBottom: `8px solid ${border}`,
+      }} />
+      <div
+        className="rounded-2xl px-4 py-3 shadow-sm border"
+        style={{ background: bg, borderColor: border, animation: 'fadeIn 0.25s ease' }}
       >
-        הבנתי
-      </button>
+        <p className="text-sm font-bold mb-0.5" style={{ color }}>{title}</p>
+        <p className="text-xs leading-relaxed mb-2 text-stone-500">{body}</p>
+        <button
+          onClick={onDismiss}
+          className="text-xs font-semibold active:scale-95 transition-transform"
+          style={{ color }}
+        >
+          הבנתי
+        </button>
+      </div>
     </div>
   )
 }
@@ -198,14 +211,15 @@ export default function HomePage() {
 
         {/* Hint 2 — distance */}
         {hint === 'distance' && (
-          <div className="mt-3">
-            <Hint
-              title="רק דברים קרובים אליך"
-              body="אפשר לבחור כמה רחוק לראות בקשות והצעות בסביבה שלך"
-              onDismiss={dismissHint}
-            />
-          </div>
-        )}
+  <div className="mt-3">
+    <Hint
+      title="רק דברים קרובים אליך"
+      body="אפשר לבחור כמה רחוק לראות בקשות והצעות בסביבה שלך"
+      onDismiss={dismissHint}
+      type="distance"
+    />
+  </div>
+)}
       </div>
 
       {/* ── Tabs ── */}
@@ -241,15 +255,15 @@ export default function HomePage() {
 
         {/* Hint 1 — tabs */}
         {hint === 'tabs' && (
-          <div className="mt-2">
-            <Hint
-              title="אפשר גם לבקש וגם להציע"
-              body="מעבר בין הטאבים יציג בקשות או הצעות מהשכונה שלך"
-              onDismiss={dismissHint}
-            />
-          </div>
-        )}
-
+  <div className="mt-2">
+    <Hint
+      title="אפשר גם לבקש וגם להציע"
+      body="מעבר בין הטאבים יציג בקשות או הצעות מהשכונה שלך"
+      onDismiss={dismissHint}
+      type="tasks"
+    />
+  </div>
+)}
         <button
           onClick={() => setShowFilters(prev => !prev)}
           className={`flex items-center gap-1 text-xs mt-2 px-3 py-1 rounded-full border transition-colors w-full justify-center ${
