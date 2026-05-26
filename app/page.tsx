@@ -24,26 +24,51 @@ function radiusLabel(meters: number, tab: Tab): string {
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
 
-function Hint({ children, onDismiss }: { children: React.ReactNode; onDismiss: () => void }) {
+function HintOverlay({ hint, onDismiss }: { 
+  hint: 'tabs-tasks' | 'tabs-offers' | 'distance'; 
+  onDismiss: () => void 
+}) {
+  const isDistance = hint === 'distance'
+
   return (
-    <div className="relative flex justify-center" dir="rtl">
-      <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-0 h-0" style={{
-        borderLeft: '6px solid transparent',
-        borderRight: '6px solid transparent',
-        borderBottom: '6px solid #e7e5e4',
-      }} />
-      <div className="bg-white border border-stone-200 rounded-xl px-3 py-2 shadow-sm flex items-center gap-3">
-        <span className="text-xs text-stone-500 leading-relaxed">{children}</span>
-        <button
-          onClick={onDismiss}
-          className="text-xs text-stone-400 shrink-0 underline active:scale-95 transition-transform"
-        >
-          הבנתי
-        </button>
+    <div
+      className="fixed inset-0 z-50"
+      style={{ background: 'rgba(0,0,0,0.25)', animation: 'fadeIn 0.3s ease' }}
+      onClick={onDismiss}
+      dir="rtl"
+    >
+      <div
+        className="absolute left-0 right-0"
+        style={{ top: isDistance ? '120px' : '210px' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-center text-white text-sm font-medium mb-3 px-6 drop-shadow">
+          {isDistance
+            ? 'אפשר לבחור את המרחק שנוח לך'
+            : 'אפשר לעבור בין בקשות להצעות'}
+        </p>
+        <div
+          className="mx-4 rounded-2xl"
+          style={{ 
+            background: 'rgba(255,255,255,0.12)',
+            border: '1.5px solid rgba(255,255,255,0.4)',
+            padding: '10px',
+          }}
+        />
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={onDismiss}
+            className="text-white text-xs font-semibold px-5 py-2 rounded-full active:scale-95 transition-transform"
+            style={{ background: 'rgba(255,255,255,0.2)' }}
+          >
+            הבנתי
+          </button>
+        </div>
       </div>
     </div>
   )
 }
+
 
 export default function HomePage() {
   const [allItems, setAllItems] = useState<Task[]>([])
@@ -199,13 +224,6 @@ export default function HomePage() {
           <span className="text-xs text-stone-300">200 מ׳</span>
         </div>
 
-        {hint === 'distance' && (
-  <div className="mt-2">
-    <Hint onDismiss={dismissHint}>
-      כאן אפשר לבחור את המרחק שנוח לך
-    </Hint>
-  </div>
-)}
       </div>
 
       {/* ── Tabs ── */}
@@ -238,17 +256,6 @@ export default function HomePage() {
         >
           {TAB_SUBTITLE[tab]}
         </p>
-
-        {(hint === 'tabs-tasks' || hint === 'tabs-offers') && (
-  <div className="mt-2">
-    <Hint onDismiss={dismissHint}>
-      כאן אפשר לעבור בין{' '}
-      <span style={{ color: '#1b5e20' }}>בקשות</span>
-      {' '}ל
-      <span style={{ color: '#5c6bc0' }}>הצעות</span>
-    </Hint>
-  </div>
-)}
 
      <button
           onClick={() => setShowFilters(prev => !prev)}
@@ -385,6 +392,10 @@ export default function HomePage() {
           box-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
       `}</style>
+
+{hint && (
+        <HintOverlay hint={hint} onDismiss={dismissHint} />
+      )}
 
     </main>
   )
