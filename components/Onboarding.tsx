@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-const KEY_DONE = 'hooddo_onboarding_done'
+const KEY_DONE = 'hooddo_onboarding_done_v2'
 
 export function useOnboardingDone(): boolean {
   if (typeof window === 'undefined') return true
