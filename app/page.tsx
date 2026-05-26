@@ -32,11 +32,12 @@ function SpeechBubble({ hint, onDismiss, anchorRef }: {
   const [top, setTop] = useState(200)
 
   useEffect(() => {
-    if (anchorRef.current) {
-      const rect = anchorRef.current.getBoundingClientRect()
-      setTop(rect.bottom + 8)
-    }
-  }, [anchorRef])
+  if (anchorRef.current) {
+    const rect = anchorRef.current.getBoundingClientRect()
+    const offset = hint === 'distance' ? 12 : hint === 'filter' ? 8 : 12
+    setTop(rect.bottom + offset)
+  }
+}, [anchorRef, hint])
 
   const text = {
     'distance': 'אפשר לבחור את המרחק שנוח לך',
@@ -245,8 +246,8 @@ const filterRef = useRef<HTMLButtonElement>(null)
       </div>
 
       {/* ── Tabs ── */}
-      <div className="mb-4" ref={tabsRef}>
-        <div className="flex gap-1 bg-stone-100 p-1 rounded-full mb-2">
+<div className="mb-4">
+  <div className="flex gap-1 bg-stone-100 p-1 rounded-full mb-2" ref={tabsRef}>
           <button
             onClick={() => setTab('tasks')}
             className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
