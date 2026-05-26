@@ -32,11 +32,11 @@ function Hint({ title, body, onDismiss, type = 'tasks' }: {
 
   return (
     <div className="relative flex justify-center" dir="rtl">
-      <div className="absolute right-8 -top-2 w-0 h-0" style={{
-        borderLeft: '8px solid transparent',
-        borderRight: '8px solid transparent',
-        borderBottom: `8px solid ${border}`,
-      }} />
+      <div className="absolute left-1/2 -translate-x-1/2 -top-2 w-0 h-0" style={{
+  borderLeft: '8px solid transparent',
+  borderRight: '8px solid transparent',
+  borderBottom: `8px solid ${border}`,
+}} />
       <div
         className="bg-white rounded-2xl px-4 py-3 shadow-lg border w-4/5"
         style={{ borderColor: border, animation: 'fadeIn 0.25s ease' }}
