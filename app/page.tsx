@@ -29,10 +29,10 @@ function SpeechBubble({ hint, onDismiss }: {
   onDismiss: () => void
 }) {
   const config = {
-    'distance': { text: 'אפשר לבחור את המרחק שנוח לך', top: '148px' },
-    'tabs-tasks': { text: 'אפשר לעבור בין בקשות להצעות', top: '248px' },
-    'tabs-offers': { text: 'אפשר לעבור בין בקשות להצעות', top: '248px' },
-    'filter': { text: 'אפשר לסנן לפי מה שרלוונטי לך', top: '340px' },
+  'distance': { text: 'אפשר לבחור את המרחק שנוח לך', top: '148px' },
+  'tabs-tasks': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
+  'tabs-offers': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
+  'filter': { text: 'אפשר לסנן לפי מה שרלוונטי לך', top: '310px' },
   }
 
   const { text, top } = config[hint]
@@ -45,9 +45,11 @@ function SpeechBubble({ hint, onDismiss }: {
       dir="rtl"
     >
       <div
-        className="absolute"
-        style={{ top, right: '16px', left: '16px', maxWidth: '320px', margin: '0 auto' }}
-        onClick={(e) => e.stopPropagation()}
+        <div
+  className="absolute"
+  style={{ top, right: '24px', left: '24px' }}
+  onClick={(e) => e.stopPropagation()}
+>
       >
         {/* זנב */}
         <div className="flex justify-center">
