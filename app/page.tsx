@@ -54,7 +54,7 @@ function SpeechBubble({ hint, onDismiss, anchorRef }: {
     >
       <div
         className="absolute"
-        style={{ top: `${top}px`, left: '50%', transform: 'translateX(-50%)', width: '260px' }}
+        style={{ top: `${top}px`, left: '50%', transform: 'translateX(-50%)', width: '280px' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center mb-0">
