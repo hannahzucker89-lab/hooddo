@@ -27,8 +27,9 @@ function radiusLabel(meters: number, tab: Tab): string {
 function Hint({ title, body, onDismiss, type = 'tasks' }: { 
   title: string; body: string; onDismiss: () => void; type?: 'tasks' | 'distance'
 }) {
-  const color = type === 'tasks' ? '#1b5e20' : '#5c6bc0'
-  const border = type === 'tasks' ? '#a5d6a7' : '#c5c6f7'
+  type?: 'tasks' | 'offers' | 'distance'
+const color = type === 'tasks' ? '#1b5e20' : type === 'offers' ? '#5c6bc0' : '#a8a29e'
+const border = type === 'tasks' ? '#a5d6a7' : type === 'offers' ? '#c5c6f7' : '#e7e5e4'
 
   return (
     <div className="relative flex justify-center" dir="rtl">
@@ -66,23 +67,27 @@ export default function HomePage() {
   const [radius, setRadius] = useState(500)
   const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
   const [showFilters, setShowFilters] = useState(false)
-  const [hint, setHint] = useState<'tabs' | 'distance' | null>(null)
+  const [hint, setHint] = useState<'tabs-tasks' | 'tabs-offers' | 'distance' | null>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const done = localStorage.getItem(HINT_KEY)
-      if (!done) setHint('tabs')
+      if (!done) setHint('tabs-tasks')
     }
   }, [])
 
   function dismissHint() {
-    if (hint === 'tabs') {
-      setHint('distance')
-    } else {
-      setHint(null)
-      localStorage.setItem(HINT_KEY, 'true')
-    }
+  if (hint === 'tabs-tasks') {
+    setTab('offers')
+    setHint('tabs-offers')
+  } else if (hint === 'tabs-offers') {
+    setTab('tasks')
+    setHint('distance')
+  } else {
+    setHint(null)
+    localStorage.setItem(HINT_KEY, 'true')
   }
+}
 
   useEffect(() => { fetchAll() }, [])
 
@@ -254,13 +259,15 @@ export default function HomePage() {
         </p>
 
         {/* Hint 1 — tabs */}
-        {hint === 'tabs' && (
+        {(hint === 'tabs-tasks' || hint === 'tabs-offers') && (
   <div className="mt-2">
     <Hint
       title="אפשר גם לבקש וגם להציע"
-      body="מעבר בין הטאבים יציג בקשות או הצעות מהשכונה שלך"
+      body={hint === 'tabs-tasks' 
+        ? 'הטאב הזה מציג בקשות מהשכונה שלך'
+        : 'הטאב הזה מציג הצעות מהשכונה שלך'}
       onDismiss={dismissHint}
-      type="tasks"
+      type={hint === 'tabs-tasks' ? 'tasks' : 'offers'}
     />
   </div>
 )}
