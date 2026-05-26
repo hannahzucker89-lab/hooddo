@@ -24,24 +24,23 @@ function radiusLabel(meters: number, tab: Tab): string {
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
 
-function Hint({ text, onDismiss }: { text: string; onDismiss: () => void }) {
+function Hint({ children, onDismiss }: { children: React.ReactNode; onDismiss: () => void }) {
   return (
-    <div
-      className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl"
-      style={{
-        background: 'rgba(255,255,255,0.85)',
-        backdropFilter: 'blur(4px)',
-        animation: 'fadeIn 0.3s ease',
-      }}
-      dir="rtl"
-    >
-      <span className="text-xs text-stone-500 leading-relaxed">{text}</span>
-      <button
-        onClick={onDismiss}
-        className="text-xs text-stone-400 font-medium shrink-0 underline active:scale-95 transition-transform"
-      >
-        הבנתי
-      </button>
+    <div className="relative flex justify-center" dir="rtl">
+      <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-0 h-0" style={{
+        borderLeft: '6px solid transparent',
+        borderRight: '6px solid transparent',
+        borderBottom: '6px solid #e7e5e4',
+      }} />
+      <div className="bg-white border border-stone-200 rounded-xl px-3 py-2 shadow-sm flex items-center gap-3">
+        <span className="text-xs text-stone-500 leading-relaxed">{children}</span>
+        <button
+          onClick={onDismiss}
+          className="text-xs text-stone-400 shrink-0 underline active:scale-95 transition-transform"
+        >
+          הבנתי
+        </button>
+      </div>
     </div>
   )
 }
@@ -201,11 +200,10 @@ export default function HomePage() {
         </div>
 
         {hint === 'distance' && (
-  <div className="mb-2">
-    <Hint
-      text="⬆️ כאן בוחרים את המרחק שנוח לך"
-      onDismiss={dismissHint}
-    />
+  <div className="mt-2">
+    <Hint onDismiss={dismissHint}>
+      כאן אפשר לבחור את המרחק שנוח לך
+    </Hint>
   </div>
 )}
       </div>
@@ -242,14 +240,17 @@ export default function HomePage() {
         </p>
 
         {(hint === 'tabs-tasks' || hint === 'tabs-offers') && (
-  <div className="mb-2">
-    <Hint
-      text="⬆️ כאן אפשר לעבור בין פיד הבקשות לפיד ההצעות"
-      onDismiss={dismissHint}
-    />
+  <div className="mt-2">
+    <Hint onDismiss={dismissHint}>
+      כאן אפשר לעבור בין{' '}
+      <span style={{ color: '#1b5e20' }}>בקשות</span>
+      {' '}ל
+      <span style={{ color: '#5c6bc0' }}>הצעות</span>
+    </Hint>
   </div>
 )}
-        <button
+
+     <button
           onClick={() => setShowFilters(prev => !prev)}
           className={`flex items-center gap-1 text-xs mt-2 px-3 py-1 rounded-full border transition-colors w-full justify-center ${
             showFilters || selectedCategories.length > 0 || rewardFilter !== 'all'
