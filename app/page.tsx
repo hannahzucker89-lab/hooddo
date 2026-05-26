@@ -54,7 +54,7 @@ function SpeechBubble({ hint, onDismiss, anchorRef }: {
     >
       <div
         className="absolute"
-        style={{ top: `${top}px`, left: '50%', transform: 'translateX(-50%)', width: '240px' }}
+        style={{ top: `${top}px`, left: '50%', transform: 'translateX(-50%)', width: '260px' }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center mb-0">
@@ -74,7 +74,7 @@ function SpeechBubble({ hint, onDismiss, anchorRef }: {
   onClick={onDismiss}
   className="text-xs font-bold text-[#1b5e20] shrink-0 active:scale-95 transition-transform whitespace-nowrap"
 >
-  הבנתי ↑
+  הבנתי
 </button>
 
         </div>
