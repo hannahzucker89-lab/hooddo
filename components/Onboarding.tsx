@@ -93,7 +93,7 @@ export default function Onboarding({ onComplete }: Props) {
           {screen === 1 && (
             <button
               onClick={() => setScreen(2)}
-              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-2xl active:scale-95 transition-transform"
+              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
             >
               המשך
             </button>
@@ -101,7 +101,7 @@ export default function Onboarding({ onComplete }: Props) {
           {screen === 2 && (
             <button
               onClick={() => setScreen(3)}
-              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-2xl active:scale-95 transition-transform"
+              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
             >
               המשך
             </button>
@@ -109,7 +109,7 @@ export default function Onboarding({ onComplete }: Props) {
           {screen === 3 && (
             <button
               onClick={finish}
-              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-2xl active:scale-95 transition-transform"
+              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
             >
               יאללה
             </button>
