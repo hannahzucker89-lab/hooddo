@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { supabase, type Task, CATEGORIES_LIST } from '@/lib/supabase'
 import TaskCard from '@/components/TaskCard'
