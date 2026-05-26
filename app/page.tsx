@@ -20,6 +20,7 @@ function radiusLabel(meters: number, tab: Tab): string {
   const type = tab === 'tasks' ? 'משימות' : 'הצעות'
   if (meters < 1000) return `${type} עד ${meters} מ׳ ממך`
   const km = meters / 1000
+
   return `${type} עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
 }
 
@@ -27,19 +28,18 @@ function Hint({ title, body, onDismiss, type = 'tasks' }: {
   title: string; body: string; onDismiss: () => void; type?: 'tasks' | 'distance'
 }) {
   const color = type === 'tasks' ? '#1b5e20' : '#5c6bc0'
-  const bg = type === 'tasks' ? '#f0faf1' : '#f0f0ff'
   const border = type === 'tasks' ? '#a5d6a7' : '#c5c6f7'
 
   return (
-    <div className="relative" dir="rtl">
-      <div className="absolute right-6 -top-2 w-0 h-0" style={{
+    <div className="relative flex justify-center" dir="rtl">
+      <div className="absolute right-8 -top-2 w-0 h-0" style={{
         borderLeft: '8px solid transparent',
         borderRight: '8px solid transparent',
         borderBottom: `8px solid ${border}`,
       }} />
       <div
-        className="rounded-2xl px-4 py-3 shadow-sm border"
-        style={{ background: bg, borderColor: border, animation: 'fadeIn 0.25s ease' }}
+        className="bg-white rounded-2xl px-4 py-3 shadow-lg border w-4/5"
+        style={{ borderColor: border, animation: 'fadeIn 0.25s ease' }}
       >
         <p className="text-sm font-bold mb-0.5" style={{ color }}>{title}</p>
         <p className="text-xs leading-relaxed mb-2 text-stone-500">{body}</p>
