@@ -29,10 +29,10 @@ function SpeechBubble({ hint, onDismiss }: {
   onDismiss: () => void
 }) {
   const config = {
-  'distance': { text: 'אפשר לבחור את המרחק שנוח לך', top: '148px' },
-  'tabs-tasks': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
-  'tabs-offers': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
-  'filter': { text: 'אפשר לסנן לפי מה שרלוונטי לך', top: '310px' },
+    'distance': { text: 'אפשר לבחור את המרחק שנוח לך', top: '148px' },
+    'tabs-tasks': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
+    'tabs-offers': { text: 'אפשר לעבור בין בקשות להצעות', top: '220px' },
+    'filter': { text: 'אפשר לסנן לפי מה שרלוונטי לך', top: '310px' },
   }
 
   const { text, top } = config[hint]
@@ -45,13 +45,10 @@ function SpeechBubble({ hint, onDismiss }: {
       dir="rtl"
     >
       <div
-        <div
-  className="absolute"
-  style={{ top, right: '24px', left: '24px' }}
-  onClick={(e) => e.stopPropagation()}
->
+        className="absolute"
+        style={{ top, right: '24px', left: '24px' }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* זנב */}
         <div className="flex justify-center">
           <div style={{
             width: 0, height: 0,
@@ -60,8 +57,6 @@ function SpeechBubble({ hint, onDismiss }: {
             borderBottom: '8px solid white',
           }} />
         </div>
-
-        {/* בועה */}
         <div
           className="bg-white rounded-2xl px-4 py-3 flex items-center justify-between gap-3"
           style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
