@@ -17,7 +17,7 @@ export const CATEGORIES_LIST = [
   { emoji: '👶', label: 'ילדים ומשפחה' },
   { emoji: '📱', label: 'טכנולוגיה' },
   { emoji: '🍲', label: 'אוכל ואירוח' },
-  { emoji: '📚', label: 'למידה ועזרה' },
+  { emoji: '📚', label: 'למידה ' },
   { emoji: '✨', label: 'אחר' },
 ] as const
 
@@ -30,7 +30,7 @@ export const CATEGORIES = {
     { emoji: '👶', label: 'ילדים ומשפחה' },
     { emoji: '📱', label: 'טכנולוגיה' },
     { emoji: '🍲', label: 'אוכל ואירוח' },
-    { emoji: '📚', label: 'למידה ועזרה' },
+    { emoji: '📚', label: 'למידה' },
     { emoji: '✨', label: 'אחר' },
   ],
   offer: [
@@ -41,7 +41,7 @@ export const CATEGORIES = {
     { emoji: '👶', label: 'ילדים ומשפחה' },
     { emoji: '📱', label: 'טכנולוגיה' },
     { emoji: '🍲', label: 'אוכל ואירוח' },
-    { emoji: '📚', label: 'למידה ועזרה' },
+    { emoji: '📚', label: 'למידה' },
     { emoji: '✨', label: 'אחר' },
   ],
 } as const

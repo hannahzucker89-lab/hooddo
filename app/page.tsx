@@ -328,7 +328,7 @@ const filterRef = useRef<HTMLButtonElement>(null)
     </div>
 
     <div className="flex gap-2 mb-4">
-      {([['all', 'הכל'], ['paid', '₪ בתשלום'], ['free', '🤝 ללא תמורה']] as ['all' | 'paid' | 'free', string][]).map(([val, lbl]) => (
+      {([['all', 'הכל'], ['paid', '🪙 בתשלום'], ['free', '🤝 ללא תמורה']] as ['all' | 'paid' | 'free', string][]).map(([val, lbl]) => (
         <button
           key={val}
           onClick={() => setRewardFilter(val)}

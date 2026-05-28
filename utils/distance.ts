@@ -22,6 +22,6 @@ export function calculateDistanceMeters(
 }
 
 export function formatDistance(meters: number): string {
-  if (meters < 1000) return `${meters} מ׳ ממך`
-  return `${(meters / 1000).toFixed(1)} ק״מ ממך`
+  if (meters < 1000) return `${meters} מ׳`
+  return `${(meters / 1000).toFixed(1)} ק״מ`
 }

@@ -135,20 +135,22 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
     }
 
     const payload = {
-      type: itemType,
-      category: category || null,
-      title: title.trim(),
-      time_option: timeOption,
-      duration_minutes: isTask ? dur : 0,
-      reward_ils: reward,
-      display_name: name.trim(),
-      phone: normalizeIsraeliPhone(phone),
-      location_source: gpsCoords ? 'gps' : 'manual',
-      address_text: null,
-      lat: finalCoords?.lat ?? null,
-      lng: finalCoords?.lng ?? null,
-      is_active: true,
-    }
+  type: itemType,
+  category: category || null,
+  title: title.trim(),
+description: description.trim() || null,
+  description: description.trim() || null,  // ✅ הוסף כאן
+  time_option: timeOption,
+  duration_minutes: isTask ? dur : 0,
+  reward_ils: reward,
+  display_name: name.trim(),
+  phone: normalizeIsraeliPhone(phone),
+  location_source: gpsCoords ? 'gps' : 'manual',
+  address_text: null,
+  lat: finalCoords?.lat ?? null,
+  lng: finalCoords?.lng ?? null,
+  is_active: true,
+}
 
     console.log('[HoodDo] insert payload:', payload)
 
@@ -325,7 +327,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
         )}
 
         {/* ── Reward ── */}
-        <Field label={`תמורה: ${rewardLabel}`}>
+        <Field label="תמורה">
           <input
             type="range"
             min={0}
