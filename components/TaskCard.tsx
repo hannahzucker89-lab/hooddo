@@ -14,9 +14,9 @@ interface Props {
 }
 
 const TIME_LABEL: Record<string, string> = {
-  מיידי: '⚡ מיידי',
-  השבוע: '📅 השבוע',
-  גמיש: '🕐 גמיש',
+  מיידי: ' מיידי',
+  השבוע: ' השבוע',
+  גמיש: ' גמיש',
 }
 
 function isRecent(createdAt: string): boolean {
@@ -74,7 +74,7 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
       {/* ── Metadata ── */}
       <div className="flex flex-col gap-1.5 mb-4 text-sm text-stone-600">
         {!isOffer && (
-          <span>⏰ כ-{task.duration_minutes} דקות · {TIME_LABEL[task.time_option] ?? task.time_option}</span>
+          <span>🕐 כ-{task.duration_minutes} דקות · {TIME_LABEL[task.time_option] ?? task.time_option}</span>
         )}
         {task.reward_ils > 0 ? (
           <span className="text-amber-700 font-medium">💰 {task.reward_ils} ₪</span>
