@@ -102,7 +102,7 @@ const filterRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
   if (typeof window !== 'undefined') {
-    const onboardingDone = localStorage.getItem('hooddo_onboarding_done_v2')
+    const onboardingDone = localStorage.getItem('hooddo_onboarding_done_v3')
     const hintsDone = localStorage.getItem(HINT_KEY)
     if (onboardingDone === 'true' && !hintsDone) setHint('distance')
   }
