@@ -138,8 +138,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
   type: itemType,
   category: category || null,
   title: title.trim(),
-description: description.trim() || null,
-  description: description.trim() || null,  // ✅ הוסף כאן
+  description: description.trim() || null,
   time_option: timeOption,
   duration_minutes: isTask ? dur : 0,
   reward_ils: reward,
