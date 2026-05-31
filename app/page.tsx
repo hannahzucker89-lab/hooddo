@@ -5,6 +5,7 @@ import { supabase, type Task, CATEGORIES_LIST } from '@/lib/supabase'
 import TaskCard from '@/components/TaskCard'
 import { calculateDistanceMeters } from '@/utils/distance'
 import { useEffect, useState, useCallback, useRef } from 'react'
+import HamburgerMenu from '@/components/HamburgerMenu'
 
 type ViewerLocation = { lat: number; lng: number }
 type Tab = 'tasks' | 'offers'
@@ -196,12 +197,15 @@ const filterRef = useRef<HTMLButtonElement>(null)
     <main className="max-w-md mx-auto px-4 pb-28">
 
       {/* ── Logo ── */}
-      <div className="pt-8 pb-0">
-        <h1 className="text-2xl font-extrabold tracking-tight text-stone-900">HoodDo 🏘️</h1>
-        <p className="text-sm font-medium text-stone-600 mt-1 mb-0">
-          לפעמים הפתרון נמצא ממש מעבר לפינה
-        </p>
-      </div>
+<div className="pt-8 pb-0 flex items-start justify-between">
+  <div>
+    <h1 className="text-2xl font-extrabold tracking-tight text-stone-900">HoodDo 🏘️</h1>
+    <p className="text-sm font-medium text-stone-600 mt-1 mb-0">
+      לפעמים הפתרון נמצא ממש מעבר לפינה
+    </p>
+  </div>
+  <HamburgerMenu />
+</div>
 
       <div className="mb-4" />
 
