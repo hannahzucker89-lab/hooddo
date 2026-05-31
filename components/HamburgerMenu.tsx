@@ -29,7 +29,7 @@ export default function HamburgerMenu() {
       >
         <span className="w-4 h-px bg-stone-600 block" />
         <span className="w-4 h-px bg-stone-600 block" />
-        <span className="w-3 h-px bg-stone-600 block self-start ml-0.5" />
+        <span className="w-3 h-px bg-stone-600 block" />
       </button>
 
       {/* Overlay */}
