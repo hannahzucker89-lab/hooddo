@@ -6,6 +6,7 @@ import { supabase, CATEGORIES } from '@/lib/supabase'
 import { isValidIsraeliPhone, normalizeIsraeliPhone } from '@/utils/phone'
 import { getSavedName, saveName, getSavedPhone, savePhone } from '@/utils/storage'
 import dynamic from 'next/dynamic'
+import PhoneAuthModal from '@/components/PhoneAuthModal'
 
 const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false })
 
@@ -56,6 +57,7 @@ const [exactDate, setExactDate] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const submitCooldown = useRef(false)
+const [showAuth, setShowAuth] = useState(false)
 
   const isTask = itemType === 'task'
 
@@ -92,6 +94,9 @@ const [exactDate, setExactDate] = useState('')
   async function handleSubmit() {
     if (submitCooldown.current || submitting) return
     setError('')
+const { data: { user } } = await supabase.auth.getUser()
+if (!user) { setShowAuth(true); return }
+
 if (!category) { setError('יש לבחור קטגוריה לפני פרסום'); return }
     if (title.trim().length < 5) { setError('יש לתאר את הפריט (לפחות 5 תווים)'); return }
     if (title.trim().length > 120) { setError('תיאור ארוך מדי (עד 120 תווים)'); return }
@@ -106,15 +111,12 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
     }
 
     if (!name.trim()) { setError('יש להזין שם או כינוי'); return }
-    if (!isValidIsraeliPhone(phone)) { setError('מספר טלפון לא תקין'); return }
-
     if (!gpsCoords && !mapCoords && !addressText.trim()) {
       setError('כדי שהשכנים הקרובים יוכלו למצוא את הפריט, יש לבחור מיקום')
       return
     }
 
     saveName(name.trim())
-    savePhone(phone)
 
     setSubmitting(true)
     submitCooldown.current = true
@@ -143,12 +145,14 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
   duration_minutes: isTask ? dur : 0,
   reward_ils: reward,
   display_name: name.trim(),
-  phone: normalizeIsraeliPhone(phone),
+  phone: user.phone ?? normalizeIsraeliPhone(phone),
   location_source: gpsCoords ? 'gps' : 'manual',
   address_text: null,
   lat: finalCoords?.lat ?? null,
   lng: finalCoords?.lng ?? null,
   is_active: true,
+user_id: user.id,
+  edit_token: crypto.randomUUID(),
 }
 
     console.log('[HoodDo] insert payload:', payload)
@@ -166,7 +170,8 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
       return
     }
 
-    router.push(`/task/${data.id}?new=1`)
+    localStorage.setItem(`hooddo_token_${data.id}`, data.edit_token)
+router.push(`/task/${data.id}?new=1`)
   }
 
   const categories = CATEGORIES[itemType]
@@ -295,36 +300,30 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
 )}
 
         {/* ── Duration — tasks only ── */}
-        {isTask && (
-          <Field label="כמה זמן בערך?">
-            <div className="flex gap-2 mb-2">
-              {[15, 30, 60].map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => setDuration(String(d))}
-                  className={`flex-1 py-2.5 rounded-full text-sm font-semibold border transition-colors ${
-                    duration === String(d)
-                      ? 'bg-stone-800 text-white border-stone-800'
-                      : 'bg-white text-stone-600 border-stone-200'
-                  }`}
-                >
-                  {d} דק׳
-                </button>
-              ))}
-            </div>
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              placeholder="או הקלד מספר אחר (5–120)"
-              min={5}
-              max={120}
-              className="input"
-            />
-          </Field>
-        )}
-
+{isTask && (
+  <Field label="כמה זמן בערך?">
+    <div className="flex items-center justify-between mb-1">
+      <span className="text-xs text-stone-400">דקות בודדות</span>
+      <span className="text-sm font-semibold text-stone-700">
+        {duration ? (Number(duration) >= 60
+          ? `${Math.floor(Number(duration) / 60)}:${String(Number(duration) % 60).padStart(2, '0')} שעות`
+          : `${duration} דקות`)
+          : 'בחר משך'}
+      </span>
+      <span className="text-xs text-stone-400">כמה שעות</span>
+    </div>
+    <input
+      type="range"
+      min={5}
+      max={240}
+      step={5}
+      value={duration || 30}
+      onChange={(e) => setDuration(e.target.value)}
+      className="w-full"
+      style={{ direction: 'ltr', accentColor: isTask ? '#1b5e20' : '#5c6bc0' }}
+    />
+  </Field>
+)}
         {/* ── Reward ── */}
         <Field label="תמורה">
           <input
@@ -431,18 +430,6 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
           />
         </Field>
 
-        {/* ── Phone ── */}
-        <Field label="WhatsApp ליצירת קשר">
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="050-0000000"
-            className="input"
-            dir="ltr"
-          />
-          
-        </Field>
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3 leading-relaxed">
             {error}
@@ -485,6 +472,16 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
         .input:focus { border-color: #1b5e20; }
         .input::placeholder { color: #a8a29e; }
       `}</style>
+{showAuth && (
+  <PhoneAuthModal
+    onSuccess={(verifiedPhone) => { 
+  setPhone(verifiedPhone)
+  setShowAuth(false)
+  handleSubmit() 
+}}
+    onClose={() => setShowAuth(false)}
+  />
+)}
     </main>
   )
 }

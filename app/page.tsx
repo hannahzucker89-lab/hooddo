@@ -94,6 +94,11 @@ export default function HomePage() {
   const [locationLoading, setLocationLoading] = useState(false)
   const [locationDenied, setLocationDenied] = useState(false)
   const [radius, setRadius] = useState(500)
+
+useEffect(() => {
+  const saved = localStorage.getItem('hooddo_radius')
+  if (saved) setRadius(Number(saved))
+}, [])
   const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
   const [showFilters, setShowFilters] = useState(false)
   const [hint, setHint] = useState<'tabs-tasks' | 'tabs-offers' | 'distance' | 'filter' | null>(null)
@@ -238,7 +243,11 @@ const filterRef = useRef<HTMLButtonElement>(null)
           min={200}
           max={2000}
           step={100}
-          onChange={(e) => setRadius(2200 - Number(e.target.value))}
+          onChange={(e) => {
+  const val = 2200 - Number(e.target.value)
+  setRadius(val)
+  localStorage.setItem('hooddo_radius', String(val))
+}}
           value={2200 - radius}
           className="w-full"
           style={{ direction: 'rtl' }}

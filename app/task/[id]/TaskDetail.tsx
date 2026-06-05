@@ -32,7 +32,7 @@ export default function TaskDetail() {
     async function load() {
       const { data } = await supabase
         .from('tasks')
-        .select('*')
+        .select('id, type, category, title, description, time_option, duration_minutes, reward_ils, display_name, is_active, created_at, lat, lng')
         .eq('id', id)
         .single()
 
@@ -43,7 +43,8 @@ export default function TaskDetail() {
 
       const saved = getSavedPhone()
       if (saved) {
-        setIsOwner(normalizeIsraeliPhone(saved) === normalizeIsraeliPhone(data.phone))
+        const token = localStorage.getItem(`hooddo_token_${data.id}`)
+setIsOwner(!!token)
       }
 
       if (navigator.geolocation) {
@@ -59,20 +60,32 @@ export default function TaskDetail() {
   }, [id])
 
   async function closeTask() {
-    if (!task || closing) return
-    setClosing(true)
-    await supabase.from('tasks').update({ is_active: false }).eq('id', task.id)
-    router.push('/')
+  if (!task || closing) return
+  setClosing(true)
+  const token = localStorage.getItem(`hooddo_token_${task.id}`)
+  if (!token) {
+    setClosing(false)
+    return
   }
+  const { data: success } = await supabase.rpc('close_task', {
+    task_id: task.id,
+    token
+  })
+  if (success) router.push('/')
+  else setClosing(false)
+}
 
-  function buildWhatsApp() {
-    if (!task) return '#'
-    const isOffer = task.type === 'offer'
-    const msg = isOffer
-      ? `היי ${task.display_name}, ראיתי את ההצעה שלך ב-HoodDo ואשמח לקבל עזרה 🙏`
-      : `היי ${task.display_name}, ראיתי את הבקשה שלך ב-HoodDo ואשמח לעזור 🙏`
-    return `https://wa.me/${task.phone}?text=${encodeURIComponent(msg)}`
-  }
+  async function buildWhatsApp() {
+  if (!task) return '#'
+  const { data } = await supabase.rpc('get_task_phone', { task_id: task.id })
+  const phone = data?.[0]?.phone
+  if (!phone) return '#'
+  const isOffer = task.type === 'offer'
+  const msg = isOffer
+    ? `היי ${task.display_name}, ראיתי את ההצעה שלך ב-HoodDo ואשמח לקבל עזרה 🙏`
+    : `היי ${task.display_name}, ראיתי את הבקשה שלך ב-HoodDo ואשמח לעזור 🙏`
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
+}
 
   async function handleShare() {
     const url = window.location.href
@@ -203,14 +216,15 @@ export default function TaskDetail() {
           {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
         </button>
       ) : task.is_active ? (
-        <a
-          href={buildWhatsApp()}
-          target="_blank"
-          rel="noopener noreferrer"
+          <button
+          onClick={async () => {
+            const url = await buildWhatsApp()
+            if (url && url !== '#') window.open(url, '_blank')
+          }}
           className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
         >
-          {isOffer ? '💬 יצירת קשר' : '💬 יצירת קשר'}
-        </a>
+          💬 יצירת קשר
+        </button>
       ) : (
         <div className="text-center text-stone-400 text-sm py-4">הפריט כבר לא פעיל</div>
       )}
