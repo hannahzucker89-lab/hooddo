@@ -57,7 +57,7 @@ exact_date: string | null
   duration_minutes: number
   reward_ils: number
   display_name: string
-  phone: string
+  phone?: string
   location_source: 'gps' | 'manual'
   address_text: string | null
   lat: number | null
