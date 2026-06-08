@@ -31,7 +31,7 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
   useEffect(() => {
     const saved = getSavedPhone()
     if (!saved) return
-    setIsOwner(normalizeIsraeliPhone(saved) === normalizeIsraeliPhone(task.phone))
+    setIsOwner(normalizeIsraeliPhone(saved) === normalizeIsraeliPhone(task.phone ?? ''))
   }, [task.phone])
 
   return (
