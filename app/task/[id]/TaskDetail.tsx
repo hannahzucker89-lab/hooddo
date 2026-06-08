@@ -38,7 +38,7 @@ export default function TaskDetail() {
 
       if (!data) { setLoading(false); return }
 
-      setTask(data)
+      setTask(data as Task)
       setLoading(false)
 
       const saved = getSavedPhone()
