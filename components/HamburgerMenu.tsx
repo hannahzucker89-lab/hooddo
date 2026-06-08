@@ -14,11 +14,13 @@ export default function HamburgerMenu() {
   }, [open])
 
   const items = [
-    { label: 'איך זה עובד', icon: '💡', href: '/how-it-works' },
-    { label: 'אודות', icon: '🏘️', href: '/about' },
-    { label: 'פרטיות ותקנון', icon: '🔒', href: '/privacy' },
-    { label: 'יצירת קשר', icon: '✉️', href: '/contact' },
-  ]
+  { label: 'אודות HoodDo', icon: '🏘️', href: '/about' },
+  { label: 'איך זה עובד', icon: '💡', href: '/how-it-works' },
+  { label: 'פרטיות', icon: '🔒', href: '/privacy' },
+  { label: 'כללי קהילה', icon: '📋', href: '/terms' },
+  { label: 'דיווח על בעיה', icon: '🚩', href: 'mailto:hooddoapp@gmail.com' },
+  { label: 'יצירת קשר', icon: '✉️', href: 'mailto:hooddoapp@gmail.com' },
+]
 
   return (
     <>
