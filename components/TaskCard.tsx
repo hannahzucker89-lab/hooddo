@@ -109,19 +109,24 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
     onClick={async (e) => {
       e.preventDefault()
       const url = `${window.location.origin}/task/${task.id}`
-      if (navigator.share) {
-        await navigator.share({ title: task.title, url })
-      } else {
-        await navigator.clipboard.writeText(url)
-      }
+      const isOffer = task.type === 'offer'
+const shareText = isOffer
+  ? `ראיתי הצעה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
+  : `ראיתי בקשה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
+
+if (navigator.share) {
+  await navigator.share({ title: task.title, text: shareText, url })
+} else {
+  await navigator.clipboard.writeText(`${shareText}\n${url}`)
+}
     }}
-    className="flex items-center gap-1 text-stone-400 text-sm px-2 py-1.5 rounded-lg active:scale-95 transition-transform"
+    className="flex items-center gap-1.5 text-stone-400 text-sm px-3 py-1.5 rounded-lg border border-stone-200 active:scale-95 transition-transform"
   >
+    שיתוף
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17 17L7 7"/>
       <path d="M17 7H7v10"/>
     </svg>
-    שיתוף
   </button>
 </div>
 
