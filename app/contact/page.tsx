@@ -11,19 +11,16 @@ export default function ContactPage() {
         <button onClick={() => router.back()} className="text-stone-400 text-2xl leading-none">&#8249;</button>
         <h1 className="text-lg font-extrabold text-stone-900">יצירת קשר</h1>
       </div>
-
       <div className="space-y-6">
         <p className="text-[16px] text-stone-600 leading-relaxed">
-          💭 יש לכם מחשבה, שאלה או רעיון?
+          יש לכם מחשבה, שאלה או רעיון?
         </p>
         <p className="text-[15px] text-stone-500 leading-relaxed">
           אנחנו תמיד שמחים לשמוע.
         </p>
-
         <div className="h-px bg-stone-100" />
-
         <div className="space-y-3">
-          <p className="text-sm text-stone-400">📧 hooddoapp@gmail.com</p>
+          <p className="text-sm text-stone-400">hooddoapp@gmail.com</p>
           
             href="mailto:hooddoapp@gmail.com"
             className="flex items-center justify-center w-full bg-[#1b5e20] text-white font-bold py-4 rounded-full active:scale-95 transition-transform"
