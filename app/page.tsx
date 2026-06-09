@@ -92,7 +92,10 @@ export default function HomePage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [viewerLocation, setViewerLocation] = useState<ViewerLocation | null>(null)
   const [locationLoading, setLocationLoading] = useState(false)
-  const [locationDenied, setLocationDenied] = useState(false)
+  const [locationDenied, setLocationDenied] = useState(() => {
+  if (typeof window === 'undefined') return false
+  return localStorage.getItem('hooddo_location_denied') === 'true'
+})
   const [radius, setRadius] = useState(500)
 
 useEffect(() => {
@@ -146,7 +149,11 @@ const filterRef = useRef<HTMLButtonElement>(null)
         setViewerLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         setLocationLoading(false)
       },
-      () => { setLocationDenied(true); setLocationLoading(false) },
+      () => { 
+  setLocationDenied(true)
+  localStorage.setItem('hooddo_location_denied', 'true')
+  setLocationLoading(false) 
+},
       { timeout: 10000, enableHighAccuracy: false }
     )
   }, [])
@@ -230,7 +237,11 @@ const filterRef = useRef<HTMLButtonElement>(null)
             </button>
           ) : (
             <button
-              onClick={() => { setLocationDenied(false); requestLocation() }}
+              onClick={() => { 
+  setLocationDenied(false)
+  localStorage.removeItem('hooddo_location_denied')
+  requestLocation() 
+}}
               className="text-xs text-[#1b5e20] font-semibold underline"
             >
               {locationLoading ? '' : 'בחירת מיקום'}

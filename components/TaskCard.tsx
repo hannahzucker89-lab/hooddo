@@ -58,7 +58,7 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
             {task.category}
           </span>
         )}
-        <h2 className="text-base font-semibold leading-snug flex-1">
+        <h2 className="text-lg font-semibold leading-snug flex-1">
           <span className="text-stone-400 font-normal">{task.display_name} · </span>
           {task.title}
         </h2>
@@ -72,7 +72,7 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
       )}
 
       {/* ── Metadata ── */}
-      <div className="flex flex-col gap-1.5 mb-4 text-sm text-stone-600">
+      <div className="flex flex-col gap-1.5 mb-4 text-base text-stone-600">
         {!isOffer && (
           <span>🕐 כ-{task.duration_minutes} דקות · {TIME_LABEL[task.time_option] ?? task.time_option}</span>
         )}
@@ -115,12 +115,13 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
         await navigator.clipboard.writeText(url)
       }
     }}
-    className="text-stone-300 text-xs px-2 py-1.5 rounded-lg active:scale-95 transition-transform"
+    className="flex items-center gap-1 text-stone-400 text-sm px-2 py-1.5 rounded-lg active:scale-95 transition-transform"
   >
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17 17L7 7"/>
       <path d="M17 7H7v10"/>
     </svg>
+    שיתוף
   </button>
 </div>
 

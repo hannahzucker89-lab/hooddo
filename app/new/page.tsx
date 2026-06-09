@@ -163,12 +163,22 @@ user_id: user.id,
       .select()
       .single()
 
-    if (dbError || !data) {
-      console.error('[HoodDo] Supabase error:', dbError)
-      setError('שגיאה בפרסום. אנא נסו שוב.')
-      setSubmitting(false)
-      return
-    }
+   if (dbError || !data) {
+  console.error('[HoodDo] Supabase error:', dbError)
+  if (!finalCoords) {
+    setError('יש לבחור מיקום לפני פרסום')
+  } else if (dbError?.code === '42501') {
+    setError('אירעה בעיית הרשאה. נסו להתנתק ולהתחבר מחדש.')
+  } else if (dbError?.message?.includes('phone')) {
+    setError('מספר הטלפון אינו תקין')
+  } else if (dbError?.code === 'PGRST') {
+    setError('אירעה בעיית חיבור, נסו שוב')
+  } else {
+    setError(`שגיאה בפרסום: ${dbError?.message ?? 'אנא נסו שוב'}`)
+  }
+  setSubmitting(false)
+  return
+}
 
     localStorage.setItem(`hooddo_token_${data.id}`, data.edit_token)
 router.push(`/task/${data.id}?new=1`)
@@ -356,10 +366,11 @@ router.push(`/task/${data.id}?new=1`)
         </Field>
 
         {/* ── Location ── */}
-        <Field label="מיקום">
-          <p className="text-xs text-stone-400 mb-2 leading-relaxed">
-            המיקום לא יוצג לאחרים — משמש רק לחישוב המרחק בין שכנים
-          </p>
+        <Field label="מיקום הבקשה / ההצעה">
+  <p className="text-sm text-stone-500 mb-3 leading-relaxed">
+    📍 המיקום שתבחרו כאן משמש לחישוב המרחק עבור שכנים אחרים.<br />
+    הכתובת המדויקת לא תוצג - רק המרחק.
+  </p>
 
           {/* ── בחירת שיטה ── */}
           <div className="flex gap-2 mb-3">
