@@ -232,9 +232,18 @@ setIsOwner(!!token)
         </button>
       ) : task.is_active ? (
           <button
-  onClick={async () => {
-    const url = await buildWhatsApp()
-    if (url && url !== '#') window.location.href = url
+  onClick={() => {
+    buildWhatsApp().then(url => {
+      if (url && url !== '#') {
+        const a = document.createElement('a')
+        a.href = url
+        a.target = '_blank'
+        a.rel = 'noopener noreferrer'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+      }
+    })
   }}
           className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
         >
