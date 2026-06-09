@@ -27,6 +27,7 @@ export default function TaskDetail() {
   const [closing, setClosing] = useState(false)
   const [distance, setDistance] = useState<number | null>(null)
   const [shared, setShared] = useState(false)
+const [whatsappUrl, setWhatsappUrl] = useState<string>('#')
 
   useEffect(() => {
     async function load() {
@@ -39,6 +40,17 @@ export default function TaskDetail() {
       if (!data) { setLoading(false); return }
 
       setTask(data as Task)
+setTask(data as Task)
+
+const { data: phoneData } = await supabase.rpc('get_task_phone', { task_id: id })
+const phone = phoneData?.[0]?.phone
+if (phone) {
+  const isOffer = data.type === 'offer'
+  const msg = isOffer
+    ? `היי ${data.display_name}, ראיתי את ההצעה שלך ב-HoodDo ואשמח לקבל עזרה 🙏`
+    : `היי ${data.display_name}, ראיתי את הבקשה שלך ב-HoodDo ואשמח לעזור 🙏`
+  setWhatsappUrl(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`)
+}
       setLoading(false)
 
       const saved = getSavedPhone()
@@ -231,24 +243,14 @@ setIsOwner(!!token)
           {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
         </button>
       ) : task.is_active ? (
-          <button
-  onClick={() => {
-    buildWhatsApp().then(url => {
-      if (url && url !== '#') {
-        const a = document.createElement('a')
-        a.href = url
-        a.target = '_blank'
-        a.rel = 'noopener noreferrer'
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-      }
-    })
-  }}
-          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
-        >
-          💬 יצירת קשר
-        </button>
+<a
+          href={whatsappUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
+>
+  💬 יצירת קשר
+</a>
       ) : (
         <div className="text-center text-stone-400 text-sm py-4">הפריט כבר לא פעיל</div>
       )}
