@@ -74,7 +74,7 @@ export default function HamburgerMenu() {
               <span className="text-sm font-semibold text-stone-700 group-hover:text-stone-900 transition-colors">דיווח על בעיה</span>
             </button>
 
-            
+            <a
               href="mailto:hooddoapp@gmail.com"
               className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-right hover:bg-stone-100 active:bg-stone-200 transition-colors group"
             >
