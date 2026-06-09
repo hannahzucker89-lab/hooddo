@@ -122,7 +122,7 @@ if (navigator.share) {
   await navigator.clipboard.writeText(`${shareText}\n${url}`)
 }
     }}
-    className="flex items-center gap-1.5 text-stone-400 text-sm px-3 py-1.5 rounded-lg border border-stone-200 active:scale-95 transition-transform"
+    className="flex items-center gap-1.5 text-stone-400 text-sm px-3 py-1.5 rounded-full border border-stone-200 active:scale-95 transition-transform"
   >
     שיתוף
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -88,15 +88,22 @@ setIsOwner(!!token)
 }
 
   async function handleShare() {
-    const url = window.location.href
-    if (navigator.share) {
-      await navigator.share({ title: task?.title ?? 'HoodDo', url })
-    } else {
-      await navigator.clipboard.writeText(url)
-      setShared(true)
-      setTimeout(() => setShared(false), 2000)
-    }
+  if (!task) return
+  const url = window.location.href
+  const isOffer = task.type === 'offer'
+  const shareText = isOffer
+    ? `ראיתי הצעה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
+    : `ראיתי בקשה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: task.title, text: shareText, url })
+    } catch {}
+  } else {
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${url}`)}`
+    window.open(waUrl, '_blank')
   }
+}
 
   if (loading) {
     return (
@@ -161,12 +168,20 @@ setIsOwner(!!token)
         <h1 className="text-lg font-extrabold text-stone-900 flex-1">
           {isOwner ? 'ניהול' : isOffer ? 'פרטי ההצעה' : 'פרטי הבקשה'}
         </h1>
-        <button
-          onClick={handleShare}
-          className="text-stone-400 text-sm px-3 py-1.5 border border-stone-200 rounded-full active:scale-95 transition-transform"
-        >
-          {shared ? '✓ הועתק' : '🔗 שיתוף'}
-        </button>
+      <button
+  onClick={handleShare}
+  className="flex items-center gap-1.5 text-stone-400 text-sm px-3 py-1.5 border border-stone-200 rounded-full active:scale-95 transition-transform"
+>
+  {shared ? '✓ הועתק' : (
+    <>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 17L7 7"/>
+        <path d="M17 7H7v10"/>
+      </svg>
+      שיתוף
+    </>
+  )}
+</button>
       </div>
 
       <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-5 mb-4">
