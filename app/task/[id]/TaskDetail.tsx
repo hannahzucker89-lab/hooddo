@@ -232,10 +232,10 @@ setIsOwner(!!token)
         </button>
       ) : task.is_active ? (
           <button
-          onClick={async () => {
-            const url = await buildWhatsApp()
-            if (url && url !== '#') window.open(url, '_blank')
-          }}
+  onClick={async () => {
+    const url = await buildWhatsApp()
+    if (url && url !== '#') window.location.href = url
+  }}
           className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
         >
           💬 יצירת קשר
