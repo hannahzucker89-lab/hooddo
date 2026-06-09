@@ -115,7 +115,9 @@ const shareText = isOffer
   : `ראיתי בקשה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
 
 if (navigator.share) {
-  await navigator.share({ title: task.title, text: shareText, url })
+  try {
+    await navigator.share({ title: task.title, text: shareText, url })
+  } catch {}
 } else {
   await navigator.clipboard.writeText(`${shareText}\n${url}`)
 }

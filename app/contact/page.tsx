@@ -8,7 +8,7 @@ export default function ContactPage() {
   return (
     <main className='max-w-md mx-auto px-5 pb-16' dir='rtl'>
       <div className='pt-6 pb-6 flex items-center gap-3'>
-        <button onClick={() => router.back()} className='text-stone-400 text-2xl leading-none'>›</button>
+        <button onClick={() => router.back()} className='text-stone-400 text-2xl leading-none'>‹</button>
         <h1 className='text-lg font-extrabold text-stone-900'>יצירת קשר</h1>
       </div>
       <div className='space-y-6'>
