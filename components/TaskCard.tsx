@@ -59,16 +59,16 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
             {task.category}
           </span>
         )}
-        <h2 className="text-lg font-semibold leading-snug flex-1">
-          <span className="text-stone-400 font-normal">
-  {task.display_name}{' '}
-  {itemType(task) === 'offer'
-    ? task.verb_form === 'male' ? 'מציע' : task.verb_form === 'female' ? 'מציעה' : 'מציע/ה'
-    : task.verb_form === 'male' ? 'מחפש' : task.verb_form === 'female' ? 'מחפשת' : 'מחפש/ת'
-  }
-</span>
-          {task.title}
-        </h2>
+        <div className="flex-1">
+          <div className="text-sm text-stone-400 font-normal mb-0.5">
+            {task.display_name}{' '}
+            {itemType(task) === 'offer'
+              ? task.verb_form === 'male' ? 'מציע' : task.verb_form === 'female' ? 'מציעה' : 'מציע/ה'
+              : task.verb_form === 'male' ? 'מחפש' : task.verb_form === 'female' ? 'מחפשת' : 'מחפש/ת'
+            }
+          </div>
+          <h2 className="text-lg font-semibold leading-snug">{task.title}</h2>
+        </div>
       </div>
 
       {/* ── Description (offers) ── */}
@@ -94,51 +94,49 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
       </div>
 
       {/* ── Footer ── */}
-<div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-stone-100">
-  {isOwner ? (
-    <Link
-      href={`/task/${task.id}`}
-      className="text-stone-400 font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
-    >
-      ניהול
-    </Link>
-  ) : (
-    <Link
-      href={`/task/${task.id}`}
-      className={`font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${
-        isOffer ? 'text-[#5c6bc0]' : 'text-[#2e7d32]'
-      }`}
-    >
-      לפרטים נוספים
-    </Link>
-  )}
-  <button
-    onClick={async (e) => {
-      e.preventDefault()
-      const url = `${window.location.origin}/task/${task.id}`
-      const isOffer = task.type === 'offer'
-const shareText = isOffer
-  ? `ראיתי הצעה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
-  : `ראיתי בקשה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
-
-if (navigator.share) {
-  try {
-    await navigator.share({ title: task.title, text: shareText, url })
-  } catch {}
-} else {
-  await navigator.clipboard.writeText(`${shareText}\n${url}`)
-}
-    }}
-    className="flex items-center gap-1.5 text-stone-400 text-sm px-3 py-1.5 rounded-full border border-stone-200 active:scale-95 transition-transform"
-  >
-    שיתוף
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 17L7 7"/>
-      <path d="M17 7H7v10"/>
-    </svg>
-  </button>
-</div>
-
+      <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-stone-100">
+        {isOwner ? (
+          <Link
+            href={`/task/${task.id}`}
+            className="text-stone-400 font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
+          >
+            ניהול
+          </Link>
+        ) : (
+          <Link
+            href={`/task/${task.id}`}
+            className={`font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${
+              isOffer ? 'text-[#5c6bc0]' : 'text-[#2e7d32]'
+            }`}
+          >
+            לפרטים נוספים
+          </Link>
+        )}
+        <button
+          onClick={async (e) => {
+            e.preventDefault()
+            const url = `${window.location.origin}/task/${task.id}`
+            const isOffer = task.type === 'offer'
+            const shareText = isOffer
+              ? `ראיתי הצעה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
+              : `ראיתי בקשה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
+            if (navigator.share) {
+              try {
+                await navigator.share({ title: task.title, text: shareText, url })
+              } catch {}
+            } else {
+              await navigator.clipboard.writeText(`${shareText}\n${url}`)
+            }
+          }}
+          className="flex items-center gap-1.5 text-stone-400 text-sm px-3 py-1.5 rounded-full border border-stone-200 active:scale-95 transition-transform"
+        >
+          שיתוף
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 17L7 7"/>
+            <path d="M17 7H7v10"/>
+          </svg>
+        </button>
+      </div>
     </div>
   )
 }
