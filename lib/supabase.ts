@@ -64,6 +64,8 @@ exact_date: string | null
   lng: number | null
   is_active: boolean
   created_at: string
+  user_id?: string
+  verb_form?: 'male' | 'female' | null
 }
 
 /** Normalise legacy rows: missing type → 'task' */

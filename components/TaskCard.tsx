@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { Task } from '@/lib/supabase'
+import { itemType } from '@/lib/supabase'
 import { formatDistance } from '@/utils/distance'
 import { getSavedPhone } from '@/utils/storage'
 import { normalizeIsraeliPhone } from '@/utils/phone'
@@ -59,7 +60,13 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
           </span>
         )}
         <h2 className="text-lg font-semibold leading-snug flex-1">
-          <span className="text-stone-400 font-normal">{task.display_name} · </span>
+          <span className="text-stone-400 font-normal">
+  {task.display_name}{' '}
+  {itemType(task) === 'offer'
+    ? task.verb_form === 'male' ? 'מציע' : task.verb_form === 'female' ? 'מציעה' : 'מציע/ה'
+    : task.verb_form === 'male' ? 'מחפש' : task.verb_form === 'female' ? 'מחפשת' : 'מחפש/ת'
+  }
+</span>
           {task.title}
         </h2>
       </div>

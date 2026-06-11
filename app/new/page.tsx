@@ -153,6 +153,7 @@ if (!category) { setError('יש לבחור קטגוריה לפני פרסום');
   is_active: true,
 user_id: user.id,
   edit_token: crypto.randomUUID(),
+      verb_form: (user.user_metadata?.verb_form as 'male' | 'female' | null) ?? null,
 }
 
     console.log('[HoodDo] insert payload:', payload)
