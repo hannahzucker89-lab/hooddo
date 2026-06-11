@@ -326,7 +326,7 @@ router.push(`/task/${data.id}?new=1`)
     <input
       type="range"
       min={5}
-      max={240}
+      max={120}
       step={5}
       value={duration || 30}
       onChange={(e) => setDuration(e.target.value)}
