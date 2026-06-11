@@ -49,6 +49,10 @@ export default function Onboarding({ onComplete }: Props) {
 
           {screen === 1 && (
   <div className="space-y-5">
+    <div className="text-center mb-2">
+      <div className="text-3xl font-extrabold text-stone-900 tracking-tight">🏘️ HoodDo</div>
+      <div className="text-stone-400 text-base mt-1">אנשים קרובים. אפשרויות חדשות.</div>
+    </div>
     <img src="/Ob1.svg" alt="" className="w-64 mx-auto mb-4" />
     <h2 className="text-2xl font-bold text-stone-900 leading-snug">
       שכנים עוזרים לשכנים
