@@ -46,7 +46,7 @@ export default function PhoneAuthModal({ onSuccess, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
+    <div className="fixed inset-0 z-[9999] bg-black/40 flex items-end justify-center">
       <div className="bg-[#faf9f7] w-full max-w-md rounded-t-3xl px-6 pt-8 pb-12">
 
         <div className="flex items-center justify-between mb-6">
