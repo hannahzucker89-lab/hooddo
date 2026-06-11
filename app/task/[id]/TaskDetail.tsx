@@ -156,16 +156,22 @@ setIsOwner(!!token)
             : 'שכנים יוכלו לראות את הבקשה שלך ולעזור'}
         </p>
         <button
-          onClick={() => router.push('/')}
+          onClick={() => router.push(`/task/${task.id}`)}
           className="w-full bg-[#1b5e20] text-white font-bold py-4 rounded-full mb-3"
         >
-          חזרה לפיד
+          ניהול הפרסום
         </button>
         <button
-          onClick={() => router.push(`/task/${task.id}`)}
-          className="w-full border border-stone-200 text-stone-600 font-semibold py-3 rounded-full text-sm"
+          onClick={() => router.push('/publish')}
+          className="w-full border border-stone-200 text-stone-600 font-semibold py-3 rounded-full text-sm mb-3"
         >
-          {isOffer ? 'צפה בהצעה' : 'צפה בבקשה'}
+          ➕ פרסום נוסף
+        </button>
+        <button
+          onClick={() => router.push('/')}
+          className="text-stone-400 text-sm underline"
+        >
+          חזרה לפיד
         </button>
       </main>
     )
