@@ -15,12 +15,17 @@ interface Props {
 }
 
 const TIME_LABEL: Record<string, string> = {
-  מיידי: 'מיידי',
-  השבוע: 'השבוע',
-  גמיש: 'גמיש',
+  מיידי: ' מיידי',
+  השבוע: ' השבוע',
+  גמיש: ' גמיש',
+}
+
+function isRecent(createdAt: string): boolean {
+  return Date.now() - new Date(createdAt).getTime() < 24 * 60 * 60 * 1000
 }
 
 export default function TaskCard({ task, distanceMeters, highlight }: Props) {
+  const recent = isRecent(task.created_at)
   const [isOwner, setIsOwner] = useState(false)
   const isOffer = task.type === 'offer'
 
@@ -30,14 +35,6 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
     setIsOwner(normalizeIsraeliPhone(saved) === normalizeIsraeliPhone(task.phone ?? ''))
   }, [task.phone])
 
-  const personLine = task.verb_form
-    ? `${task.display_name} ${
-        itemType(task) === 'offer'
-          ? task.verb_form === 'male' ? 'מציע' : 'מציעה'
-          : task.verb_form === 'male' ? 'מחפש' : 'מחפשת'
-      }`
-    : task.display_name
-
   return (
     <div
       className={`rounded-2xl p-4 border transition-colors ${
@@ -46,56 +43,67 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
           : 'bg-[#f3faf4] border-[#bfe0c2]'
       } ${highlight ? 'shadow-sm' : ''}`}
     >
-      {/* ── Person + type ── */}
-      <div className="flex items-center gap-1.5 text-sm text-stone-500 mb-1">
-        <span>{personLine}</span>
-        <span className="text-stone-300">·</span>
-        <span className={`font-semibold ${isOffer ? 'text-[#5c6bc0]' : 'text-[#1b5e20]'}`}>
+      {/* ── Title row ── */}
+      <div className="flex items-start gap-2 mb-3">
+        {recent && (
+          <span className={`mt-0.5 shrink-0 text-xs font-bold px-1.5 py-0.5 rounded-md leading-tight text-white ${
+            isOffer ? 'bg-[#5c6bc0]' : 'bg-[#1b5e20]'
+          }`}>
+            חדש
+          </span>
+        )}
+        {task.category && (
+          <span className="mt-0.5 shrink-0 text-xs text-stone-400 bg-white px-2 py-0.5 rounded-md">
+            {task.category}
+          </span>
+        )}
+        <span className={`mt-0.5 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-md border bg-white/70 ${
+          isOffer ? 'text-[#5c6bc0] border-[#d6d7f9]' : 'text-[#1b5e20] border-[#bfe0c2]'
+        }`}>
           {isOffer ? 'הצעה' : 'בקשה'}
         </span>
+        <div className="flex-1">
+          <div className="text-sm text-stone-400 font-normal mb-0.5">
+            {task.display_name}{' '}
+            {itemType(task) === 'offer'
+              ? task.verb_form === 'male' ? 'מציע' : task.verb_form === 'female' ? 'מציעה' : 'מציע/ה'
+              : task.verb_form === 'male' ? 'מחפש' : task.verb_form === 'female' ? 'מחפשת' : 'מחפש/ת'
+            }
+          </div>
+          <h2 className="text-lg font-semibold leading-snug">{task.title}</h2>
+        </div>
       </div>
 
-      {/* ── Category ── */}
-      {task.category && (
-        <div className="text-xs text-stone-400 mb-1">
-          {task.category}
-        </div>
+      {/* ── Description (offers) ── */}
+      {isOffer && task.description && (
+        <p className="text-sm text-stone-500 leading-relaxed mb-3 border-r-2 border-[#c5c6f7] pr-3">
+          {task.description}
+        </p>
       )}
 
-      {/* ── Title ── */}
-      <h2 className="text-lg font-semibold leading-snug mb-2">{task.title}</h2>
-
-      {/* ── Metadata row ── */}
-      <div className="flex items-center gap-2 text-sm text-stone-600 mb-3">
+      {/* ── Metadata ── */}
+      <div className="flex flex-col gap-1.5 mb-4 text-base text-stone-600">
+        {!isOffer && (
+          <span>🕐 כ-{task.duration_minutes} דקות · {TIME_LABEL[task.time_option] ?? task.time_option}</span>
+        )}
         {task.reward_ils > 0 ? (
           <span className="text-amber-700 font-medium">💰 {task.reward_ils} ₪</span>
         ) : (
-          <span className="text-stone-400">ללא תמורה</span>
-        )}
-        {!isOffer && (
-          <>
-            <span className="text-stone-300">•</span>
-            <span>⏱️ כ-{task.duration_minutes} דקות{task.time_option ? ` · ${TIME_LABEL[task.time_option] ?? task.time_option}` : ''}</span>
-          </>
+          <span className="text-stone-400 text-xs">ללא תמורה</span>
         )}
         {distanceMeters !== undefined && (
-          <>
-            <span className="text-stone-300">•</span>
-            <span>📍 {formatDistance(distanceMeters)}</span>
-          </>
+          <span>📍 {formatDistance(distanceMeters)} ממך</span>
         )}
       </div>
 
       {/* ── Footer ── */}
-      <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/60">
+      <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-white/60">
         {isOwner ? (
           <Link
             href={`/task/${task.id}`}
-            className={`font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${
-              isOffer ? 'text-[#5c6bc0]' : 'text-[#2e7d32]'
-            }`}
+            className="text-stone-400 font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform"
           >
-            {isOffer ? 'ניהול ההצעה' : 'ניהול הבקשה'}
+            ניהול
           </Link>
         ) : (
           <Link
@@ -111,6 +119,7 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
           onClick={async (e) => {
             e.preventDefault()
             const url = `${window.location.origin}/task/${task.id}`
+            const isOffer = task.type === 'offer'
             const shareText = isOffer
               ? `ראיתי הצעה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
               : `ראיתי בקשה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
