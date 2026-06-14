@@ -348,8 +348,10 @@ export default function HomePage() {
             <div key={i} className="bg-white rounded-2xl p-4 h-28 animate-pulse border border-stone-100" />
           ))}
         </div>
+      ) : !viewerLocation && !locationLoading ? (
+        <NoLocationState onEnable={requestLocation} />
       ) : nearbyEmpty ? (
-        <NearbyEmptyState onShowAll={() => setViewerLocation(null)} />
+        <NearbyEmptyState />
       ) : enriched.length === 0 ? (
         <EmptyState />
       ) : (
@@ -420,16 +422,30 @@ export default function HomePage() {
   )
 }
 
-function NearbyEmptyState({ onShowAll }: { onShowAll: () => void }) {
+function NoLocationState({ onEnable }: { onEnable: () => void }) {
   return (
     <div className="mt-6 text-center px-2">
-      <p className="text-stone-500 text-base mb-3">כרגע אין פרסומים בטווח הזה.</p>
+      <div className="text-4xl mb-3">📍</div>
+      <p className="text-stone-700 text-base font-semibold mb-2">כדי לראות פרסומים קרובים אליך</p>
+      <p className="text-sm text-stone-500 leading-relaxed mb-5">
+        HoodDo מציג רק פרסומים מהשכונה שלך.<br />
+        יש לאפשר גישה למיקום כדי להמשיך.
+      </p>
       <button
-        onClick={onShowAll}
-        className="inline-flex items-center justify-center gap-2 border border-stone-300 text-stone-600 font-semibold px-6 py-3 rounded-full text-sm active:scale-95 transition-transform"
+        onClick={onEnable}
+        className="inline-flex items-center justify-center gap-2 bg-[#1b5e20] text-white font-semibold px-6 py-3 rounded-full text-sm active:scale-95 transition-transform"
       >
-        הצג הכל באזור
+        אפשר מיקום
       </button>
+    </div>
+  )
+}
+
+function NearbyEmptyState() {
+  return (
+    <div className="mt-6 text-center px-2">
+      <p className="text-stone-500 text-base mb-1">כרגע אין פרסומים בטווח הזה.</p>
+      <p className="text-sm text-stone-400">אפשר להרחיב את טווח החיפוש בסליידר שלמעלה.</p>
     </div>
   )
 }
