@@ -86,7 +86,7 @@ export default function HomePage() {
     if (typeof window === 'undefined') return false
     return localStorage.getItem('hooddo_location_denied') === 'true'
   })
-  const [radius, setRadius] = useState(500)
+  const [radius, setRadius] = useState(2000)
 
   useEffect(() => {
     const saved = localStorage.getItem('hooddo_radius')
@@ -221,11 +221,7 @@ export default function HomePage() {
               ? '📍 מיקום נוכחי'
               : '📍 מיקום לא הוגדר'}
           </span>
-          {viewerLocation ? (
-            <button onClick={() => setViewerLocation(null)} className="text-xs text-stone-400 underline">
-              נקה
-            </button>
-          ) : (
+          {!viewerLocation && (
             <button
               onClick={() => {
                 setLocationDenied(false)

@@ -53,11 +53,8 @@ if (phone) {
 }
       setLoading(false)
 
-      const saved = getSavedPhone()
-      if (saved) {
-        const token = localStorage.getItem(`hooddo_token_${data.id}`)
-setIsOwner(!!token)
-      }
+      const token = localStorage.getItem(`hooddo_token_${data.id}`)
+      setIsOwner(!!token)
 
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((pos) => {
