@@ -4,10 +4,11 @@ import Link from 'next/link'
 import { supabase, type Task, CATEGORIES_LIST } from '@/lib/supabase'
 import TaskCard from '@/components/TaskCard'
 import { calculateDistanceMeters } from '@/utils/distance'
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import HamburgerMenu from '@/components/HamburgerMenu'
+import ChooseCornerScreen from '@/components/ChooseCornerScreen'
+import { getMyCorner, type Corner } from '@/utils/corner'
 
-type ViewerLocation = { lat: number; lng: number }
 type FeedFilter = 'all' | 'tasks' | 'offers'
 
 const HINT_KEY = 'hooddo_hints_done_v2'
@@ -80,12 +81,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [feedFilter, setFeedFilter] = useState<FeedFilter>('all')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [viewerLocation, setViewerLocation] = useState<ViewerLocation | null>(null)
-  const [locationLoading, setLocationLoading] = useState(false)
-  const [locationDenied, setLocationDenied] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return localStorage.getItem('hooddo_location_denied') === 'true'
-  })
+  const [myCorner, setMyCornerState] = useState<Corner | null>(null)
+  const [cornerLoading, setCornerLoading] = useState(true)
   const [radius, setRadius] = useState(2000)
 
   useEffect(() => {
@@ -129,24 +126,15 @@ export default function HomePage() {
     setLoading(false)
   }
 
-  const requestLocation = useCallback(() => {
-    if (!navigator.geolocation) { setLocationDenied(true); return }
-    setLocationLoading(true)
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setViewerLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude })
-        setLocationLoading(false)
-      },
-      () => {
-        setLocationDenied(true)
-        localStorage.setItem('hooddo_location_denied', 'true')
-        setLocationLoading(false)
-      },
-      { timeout: 10000, enableHighAccuracy: false }
-    )
+  useEffect(() => {
+    async function loadCorner() {
+      setCornerLoading(true)
+      const corner = await getMyCorner()
+      setMyCornerState(corner)
+      setCornerLoading(false)
+    }
+    loadCorner()
   }, [])
-
-  useEffect(() => { requestLocation() }, [requestLocation])
 
   function toggleCategory(label: string) {
     setSelectedCategories(prev =>
@@ -181,19 +169,30 @@ export default function HomePage() {
   const enriched = filtered
     .map((item) => {
       const dist =
-        viewerLocation && item.lat && item.lng
-          ? calculateDistanceMeters(viewerLocation.lat, viewerLocation.lng, item.lat, item.lng)
+        myCorner && item.lat && item.lng
+          ? calculateDistanceMeters(myCorner.lat, myCorner.lng, item.lat, item.lng)
           : null
       return { item, dist }
     })
-    .filter(({ dist }) => viewerLocation && dist != null ? dist <= radius : true)
+    .filter(({ dist }) => myCorner && dist != null ? dist <= radius : true)
     .sort((a, b) => {
-      if (viewerLocation && a.dist != null && b.dist != null && a.dist !== b.dist)
+      if (myCorner && a.dist != null && b.dist != null && a.dist !== b.dist)
         return a.dist - b.dist
       return new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime()
     })
 
-  const nearbyEmpty = viewerLocation && enriched.length === 0 && typeFiltered.length > 0
+  const nearbyEmpty = myCorner && enriched.length === 0 && typeFiltered.length > 0
+
+  if (!cornerLoading && !myCorner) {
+    return (
+      <ChooseCornerScreen
+        onDone={async () => {
+          const corner = await getMyCorner()
+          setMyCornerState(corner)
+        }}
+      />
+    )
+  }
 
   return (
     <main className="max-w-md mx-auto px-4 pb-28">
@@ -215,24 +214,8 @@ export default function HomePage() {
       <div className="mb-4 px-1" ref={sliderRef}>
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-stone-400">
-            {locationLoading
-              ? '📍 מאתר מיקום...'
-              : viewerLocation
-              ? '📍 מיקום נוכחי'
-              : '📍 מיקום לא הוגדר'}
+            📍 הפינה שלי
           </span>
-          {!viewerLocation && (
-            <button
-              onClick={() => {
-                setLocationDenied(false)
-                localStorage.removeItem('hooddo_location_denied')
-                requestLocation()
-              }}
-              className="text-xs text-[#1b5e20] font-semibold underline"
-            >
-              {locationLoading ? '' : 'בחירת מיקום'}
-            </button>
-          )}
         </div>
 
         <input
@@ -342,14 +325,12 @@ export default function HomePage() {
       )}
 
       {/* ── Feed ── */}
-      {loading ? (
+      {loading || cornerLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-white rounded-2xl p-4 h-28 animate-pulse border border-stone-100" />
           ))}
         </div>
-      ) : !viewerLocation && !locationLoading ? (
-        <NoLocationState onEnable={requestLocation} />
       ) : nearbyEmpty ? (
         <NearbyEmptyState />
       ) : enriched.length === 0 ? (
@@ -419,25 +400,6 @@ export default function HomePage() {
       )}
 
     </main>
-  )
-}
-
-function NoLocationState({ onEnable }: { onEnable: () => void }) {
-  return (
-    <div className="mt-6 text-center px-2">
-      <div className="text-4xl mb-3">📍</div>
-      <p className="text-stone-700 text-base font-semibold mb-2">כדי לראות פרסומים קרובים אליך</p>
-      <p className="text-sm text-stone-500 leading-relaxed mb-5">
-        HoodDo מציג רק פרסומים מהשכונה שלך.<br />
-        יש לאפשר גישה למיקום כדי להמשיך.
-      </p>
-      <button
-        onClick={onEnable}
-        className="inline-flex items-center justify-center gap-2 bg-[#1b5e20] text-white font-semibold px-6 py-3 rounded-full text-sm active:scale-95 transition-transform"
-      >
-        אפשר מיקום
-      </button>
-    </div>
   )
 }
 
