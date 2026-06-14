@@ -31,10 +31,11 @@ export default function RootLayout({
         <meta name="twitter:title" content="HoodDo – אנשים קרובים. אפשרויות חדשות." />
       </head>
       <body className="min-h-screen bg-[#f9f7f4]">
-        {ready && showOnboarding && (
+        {ready && showOnboarding ? (
           <Onboarding onComplete={() => setShowOnboarding(false)} />
+        ) : (
+          children
         )}
-        {children}
       </body>
     </html>
   )
