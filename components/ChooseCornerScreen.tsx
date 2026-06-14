@@ -41,6 +41,7 @@ export default function ChooseCornerScreen({ onDone }: Props) {
       <h1 className="text-xl font-extrabold text-stone-900 mb-2 text-center">בחרו את הפינה שלכם</h1>
       <p className="text-sm text-stone-500 leading-relaxed mb-6 text-center">
         בחרו מקום שממנו תרצו לראות ולפרסם.<br />
+        HoodDo תשתמש בפינה הזו כדי לחשב מרחקים ולהציג לכם את מה שקורה בסביבה.<br />
         אפשר לשנות את הבחירה בכל רגע.
       </p>
 
