@@ -36,6 +36,8 @@ function NewTaskForm() {
 
   const [itemType, setItemType] = useState<ItemType>(initialType)
   const [category, setCategory] = useState('')
+  const [categoryError, setCategoryError] = useState(false)
+  const categoryRef = useRef<HTMLDivElement>(null)
   const [title, setTitle] = useState('')
 const [description, setDescription] = useState('')
   const [timeOption, setTimeOption] = useState<TimeOption>('השבוע')
@@ -97,7 +99,12 @@ const [showAuth, setShowAuth] = useState(false)
 const { data: { user } } = await supabase.auth.getUser()
 if (!user) { setShowAuth(true); return }
 
-if (!category) { setError('יש לבחור קטגוריה לפני פרסום'); return }
+if (!category) {
+  setCategoryError(true)
+  categoryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  setTimeout(() => setCategoryError(false), 2000)
+  return
+}
     if (title.trim().length < 5) { setError('יש לתאר את הפריט (לפחות 5 תווים)'); return }
     if (title.trim().length > 120) { setError('תיאור ארוך מדי (עד 120 תווים)'); return }
 
@@ -204,8 +211,9 @@ router.push(`/task/${data.id}?new=1`)
        
 
         {/* ── Category ── */}
+        <div ref={categoryRef}>
         <Field label="יש לבחור תחום">
-  <div className="flex flex-wrap gap-2">
+  <div className={`flex flex-wrap gap-2 rounded-xl transition-all ${categoryError ? 'ring-2 ring-red-400 ring-offset-2' : ''}`}>
             {categories.map(({ emoji, label }) => (
               <button
                 key={label}
@@ -222,6 +230,7 @@ router.push(`/task/${data.id}?new=1`)
             ))}
           </div>
         </Field>
+        </div>
 
         {/* ── Title ── */}
         <Field label={isTask ? 'כותרת הבקשה' : 'כותרת ההצעה'}>
@@ -451,7 +460,7 @@ router.push(`/task/${data.id}?new=1`)
         <button
           type="button"
           onClick={handleSubmit}
-          disabled={isLoading || !category}
+          disabled={isLoading}
           className={`w-full text-white font-bold text-lg py-4 rounded-full shadow-md active:scale-95 transition-transform disabled:opacity-60 ${
   isTask ? 'bg-[#1b5e20]' : 'bg-[#5c6bc0]'
 }`}
