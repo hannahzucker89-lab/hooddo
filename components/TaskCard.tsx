@@ -12,6 +12,7 @@ interface Props {
   task: Task
   distanceMeters?: number
   highlight?: boolean
+  variant?: 'public' | 'owner'
 }
 
 const TIME_LABEL: Record<string, string> = {
@@ -20,7 +21,7 @@ const TIME_LABEL: Record<string, string> = {
   גמיש: 'גמיש',
 }
 
-export default function TaskCard({ task, distanceMeters, highlight }: Props) {
+export default function TaskCard({ task, distanceMeters, highlight, variant = 'public' }: Props) {
   const [isOwner, setIsOwner] = useState(false)
   const isOffer = task.type === 'offer'
 
@@ -88,7 +89,10 @@ export default function TaskCard({ task, distanceMeters, highlight }: Props) {
 
       {/* ── Footer ── */}
       <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/60">
-        {isOwner ? (
+        {!task.is_active && (
+          <span className="text-xs text-stone-400 ml-auto">סגור</span>
+        )}
+        {(variant === 'owner' || isOwner) ? (
           <Link
             href={`/task/${task.id}`}
             className={`font-medium text-sm px-3 py-1.5 rounded-lg active:scale-95 transition-transform ${

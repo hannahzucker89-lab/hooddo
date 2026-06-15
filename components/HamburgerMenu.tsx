@@ -1,13 +1,20 @@
 'use client'
-
 import ReportModal from '@/components/ReportModal'
+import PhoneAuthModal from '@/components/PhoneAuthModal'
+import { supabase } from '@/lib/supabase'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function HamburgerMenu() {
   const [open, setOpen] = useState(false)
   const [showReport, setShowReport] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
+  const [isAuthed, setIsAuthed] = useState<boolean | undefined>(undefined)
   const router = useRouter()
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => setIsAuthed(!!user))
+  }, [])
 
   useEffect(() => {
     if (open) document.body.style.overflow = 'hidden'
@@ -15,7 +22,7 @@ export default function HamburgerMenu() {
     return () => { document.body.style.overflow = '' }
   }, [open])
 
-  const items = [
+  const hoodDoItems = [
     { label: 'אודות HoodDo', icon: '🏘️', href: '/about' },
     { label: 'איך זה עובד', icon: '💡', href: '/how-it-works' },
     { label: 'פרטיות', icon: '🔒', href: '/privacy' },
@@ -53,7 +60,37 @@ export default function HamburgerMenu() {
           </div>
 
           <nav className="space-y-1">
-            {items.map(({ label, icon, href }) => (
+            {isAuthed && (
+              <button
+                onClick={() => { setOpen(false); router.push('/my-tasks') }}
+                className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-right hover:bg-stone-100 active:bg-stone-200 transition-colors group"
+              >
+                <span className="text-lg">📄</span>
+                <span className="text-sm font-semibold text-stone-700 group-hover:text-stone-900 transition-colors">הפרסומים שלי</span>
+              </button>
+            )}
+
+            {isAuthed && (
+              <div className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-right opacity-50 cursor-not-allowed">
+                <span className="text-lg">📍</span>
+                <span className="text-sm font-semibold text-stone-500">הפינה שלי</span>
+                <span className="text-xs text-stone-400 mr-auto">בקרוב</span>
+              </div>
+            )}
+
+            {isAuthed === false && (
+              <button
+                onClick={() => { setOpen(false); setShowAuth(true) }}
+                className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-right hover:bg-stone-100 active:bg-stone-200 transition-colors group"
+              >
+                <span className="text-lg">📱</span>
+                <span className="text-sm font-semibold text-stone-700 group-hover:text-stone-900 transition-colors">התחברות</span>
+              </button>
+            )}
+
+            {isAuthed !== undefined && <div className="border-t border-stone-200 my-2" />}
+
+            {hoodDoItems.map(({ label, icon, href }) => (
               <button
                 key={label}
                 onClick={() => { setOpen(false); router.push(href) }}
@@ -98,6 +135,12 @@ export default function HamburgerMenu() {
       </div>
 
       {showReport && <ReportModal onClose={() => setShowReport(false)} />}
+      {showAuth && (
+        <PhoneAuthModal
+          onSuccess={() => { setShowAuth(false); setIsAuthed(true) }}
+          onClose={() => setShowAuth(false)}
+        />
+      )}
     </>
   )
 }
