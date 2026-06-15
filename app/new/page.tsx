@@ -6,6 +6,7 @@ import { supabase, CATEGORIES } from '@/lib/supabase'
 import { isValidIsraeliPhone, normalizeIsraeliPhone } from '@/utils/phone'
 import { getSavedName, saveName, getSavedPhone, savePhone } from '@/utils/storage'
 import dynamic from 'next/dynamic'
+import { getMyCorner, setMyCorner, type Corner } from '@/utils/corner'
 import PhoneAuthModal from '@/components/PhoneAuthModal'
 
 const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false })
@@ -45,10 +46,14 @@ const [exactDate, setExactDate] = useState('')
   const [duration, setDuration] = useState('')
   const [reward, setReward] = useState(25)
 
+  // ── My Corner state ──
+  const [myCorner, setMyCornerState] = useState<Corner | null | undefined>(undefined) // undefined = loading
+  const [useOtherLocation, setUseOtherLocation] = useState(false)
+
   // ── Location state — all together ──
   const [locationMode, setLocationMode] = useState<'gps' | 'map' | 'address'>('map')
-  const [addressText, setAddressText] = useState('')
   const [city] = useState('תל אביב') // TODO: make editable in future version
+  const [addressText, setAddressText] = useState('')
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsLoading, setGpsLoading] = useState(false)
@@ -71,6 +76,9 @@ const [showAuth, setShowAuth] = useState(false)
   }, [searchParams])
 
   useEffect(() => { setCategory('') }, [itemType])
+useEffect(() => {
+    getMyCorner().then(setMyCornerState)
+  }, [])
 
   // Auto-request GPS when mode switches to gps
   useEffect(() => {
@@ -118,7 +126,8 @@ if (!category) {
     }
 
     if (!name.trim()) { setError('יש להזין שם או כינוי'); return }
-    if (!gpsCoords && !mapCoords && !addressText.trim()) {
+    const usingCorner = myCorner && !useOtherLocation
+    if (!usingCorner && !gpsCoords && !mapCoords && !addressText.trim()) {
       setError('כדי שהשכנים הקרובים יוכלו למצוא את הפריט, יש לבחור מיקום')
       return
     }
@@ -129,7 +138,7 @@ if (!category) {
     submitCooldown.current = true
     setTimeout(() => { submitCooldown.current = false }, 10000)
 
-    let finalCoords = gpsCoords ?? mapCoords
+    let finalCoords: { lat: number; lng: number } | null = usingCorner ? myCorner : (gpsCoords ?? mapCoords)
 
     if (!finalCoords && addressText.trim()) {
       setGeocoding(true)
@@ -153,7 +162,7 @@ if (!category) {
   reward_ils: reward,
   display_name: name.trim(),
   phone: user.phone ?? normalizeIsraeliPhone(phone),
-  location_source: gpsCoords ? 'gps' : 'manual',
+  location_source: usingCorner ? 'corner' : (gpsCoords ? 'gps' : 'manual'),
   address_text: null,
   lat: finalCoords?.lat ?? null,
   lng: finalCoords?.lng ?? null,
@@ -187,6 +196,10 @@ user_id: user.id,
   setSubmitting(false)
   return
 }
+
+    if (!myCorner && finalCoords) {
+      await setMyCorner({ lat: finalCoords.lat, lng: finalCoords.lng })
+    }
 
     localStorage.setItem(`hooddo_token_${data.id}`, data.edit_token)
 router.push(`/task/${data.id}?new=1`)
@@ -378,66 +391,96 @@ router.push(`/task/${data.id}?new=1`)
         {/* ── Location ── */}
         <Field label="מיקום הבקשה / ההצעה">
   <p className="text-sm text-stone-500 mb-3 leading-relaxed">
-    📍 המיקום שתבחרו כאן משמש לחישוב המרחק עבור שכנים אחרים.<br />
+    📍 המיקום שייבחר משמש לחישוב המרחק עבור שכנים אחרים.<br />
     הכתובת המדויקת לא תוצג - רק המרחק.
   </p>
 
-          {/* ── בחירת שיטה ── */}
-          <div className="flex gap-2 mb-3">
-            {(['address', 'map', 'gps'] as const).map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setLocationMode(mode)}
-                className={`flex-1 py-2 rounded-full text-xs font-bold border transition-colors ${
-                  locationMode === mode
-                    ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
-                    : 'bg-white text-stone-500 border-stone-200'
-                }`}
-              >
-                {mode === 'gps' ? '📍 GPS' : mode === 'map' ? '🗺️ מפה' : '⌨️ כתובת'}
-              </button>
-            ))}
-          </div>
-
-          {/* ── GPS ── */}
-          {locationMode === 'gps' && (
-            gpsCoords ? (
-              <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                <span className="text-sm text-green-700 font-medium">📍 מיקום זוהה</span>
-                <button type="button" onClick={() => setGpsCoords(null)} className="text-xs text-stone-400 underline">
-                  הסר
-                </button>
+          {myCorner === undefined ? (
+            <div className="bg-stone-100 animate-pulse rounded-xl h-16" />
+          ) : myCorner && !useOtherLocation ? (
+            <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+              <div>
+                <div className="text-sm text-green-700 font-bold">📍 הפינה שלי</div>
+                <div className="text-xs text-green-600 mt-0.5">{myCorner.label || 'המיקום שנבחר'}</div>
               </div>
-            ) : (
               <button
                 type="button"
-                onClick={requestGPS}
-                disabled={gpsLoading}
-                className="w-full border border-stone-200 bg-white rounded-xl py-3 text-sm text-stone-600 font-medium flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-60"
+                onClick={() => setUseOtherLocation(true)}
+                className="text-xs text-stone-500 underline"
               >
-                {gpsLoading ? <span className="animate-pulse">מאתר מיקום...</span> : <>📍 השתמש במיקומי הנוכחי</>}
+                שינוי
               </button>
-            )
-          )}
+            </div>
+          ) : (
+            <>
+              {myCorner && (
+                <button
+                  type="button"
+                  onClick={() => setUseOtherLocation(false)}
+                  className="text-xs text-stone-500 underline mb-2"
+                >
+                  ← חזרה לפינה שלי
+                </button>
+              )}
 
-          {/* ── מפה ── */}
-          {locationMode === 'map' && (
-            <LocationPicker
-              selected={mapCoords}
-              onSelect={(coords) => setMapCoords(coords)}
-            />
-          )}
+              {/* ── בחירת שיטה ── */}
+              <div className="flex gap-2 mb-3">
+                {(['address', 'map', 'gps'] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setLocationMode(mode)}
+                    className={`flex-1 py-2 rounded-full text-xs font-bold border transition-colors ${
+                      locationMode === mode
+                        ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+                        : 'bg-white text-stone-500 border-stone-200'
+                    }`}
+                  >
+                    {mode === 'gps' ? '📍 GPS' : mode === 'map' ? '🗺️ מפה' : '⌨️ כתובת'}
+                  </button>
+                ))}
+              </div>
 
-          {/* ── כתובת ── */}
-          {locationMode === 'address' && (
-            <input
-              type="text"
-              value={addressText}
-              onChange={(e) => setAddressText(e.target.value)}
-              placeholder="לדוגמה: רוטשילד 22, תל אביב"
-              className="input"
-            />
+              {/* ── GPS ── */}
+              {locationMode === 'gps' && (
+                gpsCoords ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+                    <span className="text-sm text-green-700 font-medium">📍 מיקום זוהה</span>
+                    <button type="button" onClick={() => setGpsCoords(null)} className="text-xs text-stone-400 underline">
+                      הסר
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={requestGPS}
+                    disabled={gpsLoading}
+                    className="w-full border border-stone-200 bg-white rounded-xl py-3 text-sm text-stone-600 font-medium flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-60"
+                  >
+                    {gpsLoading ? <span className="animate-pulse">מאתר מיקום...</span> : <>📍 השתמש במיקומי הנוכחי</>}
+                  </button>
+                )
+              )}
+
+              {/* ── מפה ── */}
+              {locationMode === 'map' && (
+                <LocationPicker
+                  selected={mapCoords}
+                  onSelect={(coords) => setMapCoords(coords)}
+                />
+              )}
+
+              {/* ── כתובת ── */}
+              {locationMode === 'address' && (
+                <input
+                  type="text"
+                  value={addressText}
+                  onChange={(e) => setAddressText(e.target.value)}
+                  placeholder="לדוגמה: רוטשילד 22, תל אביב"
+                  className="input"
+                />
+              )}
+            </>
           )}
         </Field>
 {/* ── Name ── */}
