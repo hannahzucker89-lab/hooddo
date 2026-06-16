@@ -1,25 +1,28 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Props {
   onSelect: (coords: { lat: number; lng: number }) => void
   selected: { lat: number; lng: number } | null
 }
 
-const TEL_AVIV_CENTER = { lat: 32.0853, lng: 34.7818 }
+const ISRAEL_CENTER = { lat: 31.5, lng: 34.75 }
+const ISRAEL_ZOOM = 7
 
 export default function LocationPicker({ onSelect, selected }: Props) {
   const mapRef = useRef<any>(null)
   const markerRef = useRef<any>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  const [query, setQuery] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState('')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     if (!containerRef.current) return
 
     import('leaflet').then((L) => {
-      // אם כבר יש מפה על ה-container — הסר אותה קודם
       if ((containerRef.current as any)._leaflet_id) {
         mapRef.current?.remove()
         mapRef.current = null
@@ -33,8 +36,9 @@ export default function LocationPicker({ onSelect, selected }: Props) {
         shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
       })
 
-      const center = selected ?? TEL_AVIV_CENTER
-      const map = L.map(containerRef.current!).setView([center.lat, center.lng], 15)
+      const center = selected ?? ISRAEL_CENTER
+      const zoom = selected ? 15 : ISRAEL_ZOOM
+      const map = L.map(containerRef.current!).setView([center.lat, center.lng], zoom)
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
@@ -64,16 +68,71 @@ export default function LocationPicker({ onSelect, selected }: Props) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  async function handleSearch() {
+    if (query.trim().length < 2) return
+    setSearching(true)
+    setSearchError('')
+    try {
+      const res = await fetch(`/api/geocode?address=${encodeURIComponent(query)}`)
+      const data = await res.json()
+      if (!res.ok || !data.lat) {
+        setSearchError('לא נמצאה כתובת. נסו ניסוח אחר.')
+        return
+      }
+      const { lat, lng } = data
+      if (mapRef.current) {
+        mapRef.current.setView([lat, lng], 15)
+      }
+      import('leaflet').then((L) => {
+        if (markerRef.current) {
+          markerRef.current.setLatLng([lat, lng])
+        } else {
+          markerRef.current = L.marker([lat, lng]).addTo(mapRef.current)
+        }
+      })
+      onSelect({ lat, lng })
+    } catch {
+      setSearchError('שגיאה בחיפוש. נסו שוב.')
+    } finally {
+      setSearching(false)
+    }
+  }
+
   return (
     <>
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+      <div className="flex gap-2 mb-3">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          placeholder="חפשו כתובת, מקום או עיר"
+          className="flex-1 border border-stone-200 rounded-xl px-4 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:border-stone-400"
+          dir="rtl"
+        />
+        <button
+          type="button"
+          onClick={handleSearch}
+          disabled={searching}
+          className="px-4 py-2.5 bg-stone-100 rounded-xl text-sm text-stone-600 font-medium active:scale-95 transition-transform disabled:opacity-50"
+        >
+          {searching ? '...' : '🔍'}
+        </button>
+      </div>
+
+      {searchError && (
+        <p className="text-xs text-red-500 mb-2 text-right">{searchError}</p>
+      )}
+
       <div
         ref={containerRef}
         className="w-full rounded-xl overflow-hidden border border-stone-200"
         style={{ height: 220 }}
       />
       <p className="text-xs text-stone-400 mt-1.5 text-center">
-        לחצי על המפה לסימון המיקום המדויק
+        אפשר גם ללחוץ על המפה לדיוק המיקום
       </p>
     </>
   )

@@ -38,7 +38,8 @@ export default function ChooseCornerScreen({ onDone }: Props) {
         { headers: { 'User-Agent': 'HoodDo/1.0' } }
       )
       const data = await res.json()
-      label = data.display_name?.split(',').slice(0, 2).join(', ')
+      const a = data.address
+      label = [a?.road, a?.city || a?.town || a?.village].filter(Boolean).join(', ')
     } catch {}
     await setMyCorner({ ...coords, label })
     onDone()
@@ -73,6 +74,12 @@ export default function ChooseCornerScreen({ onDone }: Props) {
       >
         {saving ? 'שומר...' : 'אישור'}
       </button>
+
+      {coords && (
+        <p className="text-xs text-stone-400 mt-3 text-center">
+          הפינה שנבחרה תשמש כברירת המחדל לצפייה ולפרסום.
+        </p>
+      )}
     </main>
   )
 }
