@@ -82,10 +82,10 @@ export default function Onboarding({ onComplete }: Props) {
                 הכל קרוב אליך
               </h2>
               <p className="text-stone-500 text-lg leading-relaxed">
-                רק דברים מהסביבה שלך — במרחק שנוח לך, ובלי לחשוף כתובת מדויקת.
+                רק דברים מהסביבה שבחרת, במרחק שנוח לך ובלי לחשוף את הכתובת המדויקת שלך.
               </p>
               <p className="text-stone-400 text-sm">
-               הכתובת לא נחשפת - רק המרחק ביניכם
+               הכתובת לא נחשפת. רק המרחק ביניכם.
               </p>
             </div>
           )}

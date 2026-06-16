@@ -38,8 +38,7 @@ export default function HowItWorksPage() {
         <div className="h-px bg-stone-100" />
         <div>
           <p className="text-xl font-extrabold text-stone-900 mb-2">מיקום ופרטיות 📍</p>
-          <p>המיקום משמש רק לחישוב המרחק בינכם לבין שכנים אחרים.</p>
-          <p className="mt-2 font-semibold text-stone-700">הכתובת המדויקת שלכם לא נחשפת אף פעם — רק המרחק המשוער.</p>
+          <p>HoodDo מציג את מה שקורה סביב הפינה שלך. הכתובת המדויקת שלך לא נחשפת - רק המרחק המשוער.</p>
         </div>
         <div className="h-px bg-stone-100" />
         <div>
