@@ -68,16 +68,23 @@ if (phone) {
   if (!task || closing) return
   setClosing(true)
   const token = localStorage.getItem(`hooddo_token_${task.id}`)
-  if (!token) {
-    setClosing(false)
-    return
+  if (token) {
+    const { data: success } = await supabase.rpc('close_task', {
+      task_id: task.id,
+      token
+    })
+    if (success) { router.push('/'); return }
   }
-  const { data: success } = await supabase.rpc('close_task', {
-    task_id: task.id,
-    token
-  })
-  if (success) router.push('/')
-  else setClosing(false)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user && user.id === task.user_id) {
+    const { error } = await supabase
+      .from('tasks')
+      .update({ is_active: false })
+      .eq('id', task.id)
+      .eq('user_id', user.id)
+    if (!error) { router.push('/'); return }
+  }
+  setClosing(false)
 }
 
   async function buildWhatsApp() {
