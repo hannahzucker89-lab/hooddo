@@ -55,7 +55,8 @@ if (phone) {
       setLoading(false)
 
       const token = localStorage.getItem(`hooddo_token_${data.id}`)
-      setIsOwner(!!token)
+      const { data: { user } } = await supabase.auth.getUser()
+      setIsOwner(!!token || (!!user && user.id === (data as Task).user_id))
 
       const corner = await getMyCorner()
       if (corner && data.lat && data.lng) {
