@@ -31,7 +31,16 @@ export default function ChooseCornerScreen({ onDone }: Props) {
   async function confirm() {
     if (!coords) return
     setSaving(true)
-    await setMyCorner(coords)
+    let label: string | undefined
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lng}&format=json&accept-language=he`,
+        { headers: { 'User-Agent': 'HoodDo/1.0' } }
+      )
+      const data = await res.json()
+      label = data.display_name?.split(',').slice(0, 2).join(', ')
+    } catch {}
+    await setMyCorner({ ...coords, label })
     onDone()
   }
 
