@@ -34,10 +34,19 @@ export default function MyTasksPage() {
     init()
   }, [])
 
-  const filtered = items.filter((item) => {
-    if (filter === 'all') return true
-    return item.type === filter
-  })
+  const filterFn = (item: Task) => filter === 'all' || item.type === filter
+
+  const activeItems = items.filter((item) => item.is_active && filterFn(item))
+  const closedItems = items.filter((item) => !item.is_active && filterFn(item))
+
+  const emptyLabel = filter === 'task'
+    ? 'בקשות שיקבלו מענה יופיעו כאן'
+    : filter === 'offer'
+    ? 'הצעות שיסגרו יופיעו כאן'
+    : 'פרסומים שנסגרו יופיעו כאן'
+
+  const activeHeader = filter === 'task' ? 'בקשות פעילות' : filter === 'offer' ? 'הצעות פעילות' : 'פעילים'
+  const closedHeader = filter === 'task' ? 'בקשות שנסגרו' : filter === 'offer' ? 'הצעות שנסגרו' : 'נסגרו'
 
   return (
     <main className="max-w-md mx-auto px-4 pb-28">
@@ -83,14 +92,36 @@ export default function MyTasksPage() {
             ))}
           </div>
 
-          {filtered.length === 0 ? (
+          {activeItems.length === 0 && closedItems.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="space-y-3">
-              {filtered.map((item) => (
-                <TaskCard key={item.id} task={item} variant="owner" />
-              ))}
-            </div>
+            <>
+              <div className="mb-2">
+                <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">{activeHeader}</h2>
+                {activeItems.length === 0 ? (
+                  <p className="text-sm text-stone-400 text-center py-4">אין פרסומים פעילים כרגע</p>
+                ) : (
+                  <div className="space-y-3">
+                    {activeItems.map((item) => (
+                      <TaskCard key={item.id} task={item} variant="owner" />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6">
+                <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">{closedHeader}</h2>
+                {closedItems.length === 0 ? (
+                  <p className="text-sm text-stone-400 text-center py-4">{emptyLabel}</p>
+                ) : (
+                  <div className="space-y-3">
+                    {closedItems.map((item) => (
+                      <TaskCard key={item.id} task={item} variant="owner" />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </>
       )}
