@@ -6,6 +6,7 @@ import { supabase, type Task } from '@/lib/supabase'
 import { getSavedPhone } from '@/utils/storage'
 import { normalizeIsraeliPhone } from '@/utils/phone'
 import { calculateDistanceMeters, formatDistance } from '@/utils/distance'
+import { getMyCorner } from '@/utils/corner'
 
 type ViewerLocation = { lat: number; lng: number }
 
@@ -56,13 +57,9 @@ if (phone) {
       const token = localStorage.getItem(`hooddo_token_${data.id}`)
       setIsOwner(!!token)
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((pos) => {
-          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude }
-          if (data.lat && data.lng) {
-            setDistance(calculateDistanceMeters(loc.lat, loc.lng, data.lat, data.lng))
-          }
-        })
+      const corner = await getMyCorner()
+      if (corner && data.lat && data.lng) {
+        setDistance(calculateDistanceMeters(corner.lat, corner.lng, data.lat, data.lng))
       }
     }
     load()
