@@ -44,6 +44,7 @@ export default function MyTasksPage() {
 
       <div className="pt-8 pb-0 flex items-start justify-between">
         <div>
+          <Link href="/" className="text-sm text-stone-400 flex items-center gap-1 mb-2">‹ הפיד</Link>
           <h1 className="text-2xl font-extrabold tracking-tight text-stone-900">הפרסומים שלי</h1>
           <p className="text-sm font-medium text-stone-500 mt-1 mb-0">
             כל הבקשות וההצעות שפרסמת במקום אחד.
