@@ -71,11 +71,10 @@ export default function HamburgerMenu() {
             )}
 
             {isAuthed && (
-              <div className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-right opacity-50 cursor-not-allowed">
+              <button onClick={() => { setOpen(false); router.push("/my-corner") }} className="w-full flex items-center gap-3 px-3 py-3.5 rounded-xl text-right hover:bg-stone-100 active:bg-stone-200 transition-colors">
                 <span className="text-lg">📍</span>
                 <span className="text-sm font-semibold text-stone-500">הפינה שלי</span>
-                <span className="text-xs text-stone-400 mr-auto">בקרוב</span>
-              </div>
+              </button>
             )}
 
             {isAuthed === false && (
