@@ -34,14 +34,13 @@ const [whatsappUrl, setWhatsappUrl] = useState<string>('#')
     async function load() {
       const { data } = await supabase
         .from('tasks')
-        .select('id, type, category, title, description, time_option, duration_minutes, reward_ils, display_name, is_active, created_at, lat, lng')
+        .select('id, type, category, title, description, time_option, duration_minutes, reward_ils, display_name, is_active, created_at, lat, lng, user_id')
         .eq('id', id)
         .single()
 
       if (!data) { setLoading(false); return }
 
       setTask(data as Task)
-setTask(data as Task)
 
 const { data: phoneData } = await supabase.rpc('get_task_phone', { task_id: id })
 const phone = phoneData?.[0]?.phone
@@ -52,11 +51,10 @@ if (phone) {
     : `היי ${data.display_name}, ראיתי את הבקשה שלך ב-HoodDo ואשמח לעזור 🙏`
   setWhatsappUrl(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`)
 }
-      setLoading(false)
-
       const token = localStorage.getItem(`hooddo_token_${data.id}`)
       const { data: { user } } = await supabase.auth.getUser()
       setIsOwner(!!token || (!!user && user.id === (data as Task).user_id))
+      setLoading(false)
 
       const corner = await getMyCorner()
       if (corner && data.lat && data.lng) {
