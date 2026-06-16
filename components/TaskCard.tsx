@@ -43,8 +43,8 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
     <div
       className={`rounded-2xl p-4 border transition-colors ${
         isOffer
-          ? 'bg-[#f6f6ff] border-[#d6d7f9]'
-          : 'bg-[#f3faf4] border-[#bfe0c2]'
+          ? task.is_active ? 'bg-[#f6f6ff] border-[#d6d7f9]' : 'bg-stone-50 border-stone-200 opacity-60'
+          : task.is_active ? 'bg-[#f3faf4] border-[#bfe0c2]' : 'bg-stone-50 border-stone-200 opacity-60'
       } ${highlight ? 'shadow-sm' : ''}`}
     >
       {/* ── Person + type ── */}
@@ -90,7 +90,7 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
       {/* ── Footer ── */}
       <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/60">
         {!task.is_active && (
-          <span className="text-xs text-stone-400 ml-auto">סגור</span>
+          <span className="text-xs font-semibold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-md ml-auto">סגורה</span>
         )}
         {(variant === 'owner' || isOwner) ? (
           <Link
