@@ -240,25 +240,35 @@ if (phone) {
       </div>
 
       {/* ── Actions ── */}
-      {isOwner ? (
+      {!task.is_active ? (
+        <div className="mt-2 rounded-2xl border border-stone-200 bg-stone-50 p-5 text-center space-y-2">
+          <div className="text-2xl">✅</div>
+          <p className="font-bold text-stone-700 text-base">נסגר</p>
+          <p className="text-sm text-stone-400 leading-relaxed">פרסום זה אינו מופיע יותר בפיד ואינו זמין ליצירת קשר.</p>
+          <button
+            onClick={() => router.push('/my-tasks')}
+            className="mt-3 w-full border border-stone-200 text-stone-500 font-semibold py-3 rounded-full text-sm active:scale-95 transition-transform"
+          >
+            חזרה לפרסומים שלי
+          </button>
+        </div>
+      ) : isOwner ? (
         <button
           onClick={closeTask}
-          disabled={closing || !task.is_active}
+          disabled={closing}
           className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-40"
         >
           {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
         </button>
-      ) : task.is_active ? (
-<a
-          href={whatsappUrl}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
->
-  💬 יצירת קשר
-</a>
       ) : (
-        <div className="text-center text-stone-400 text-sm py-4">הפריט כבר לא פעיל</div>
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
+        >
+          💬 יצירת קשר
+        </a>
       )}
 
     </main>
