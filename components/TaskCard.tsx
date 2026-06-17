@@ -41,12 +41,13 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
 
   return (
     <div
-      className={`rounded-2xl p-4 border transition-colors ${
+      className={`rounded-2xl border transition-colors ${
         isOffer
-          ? task.is_active ? 'bg-[#f6f6ff] border-[#d6d7f9]' : 'bg-stone-50 border-stone-200 opacity-60'
-          : task.is_active ? 'bg-[#f3faf4] border-[#bfe0c2]' : 'bg-stone-50 border-stone-200 opacity-60'
+          ? task.is_active ? 'bg-[#f6f6ff] border-[#d6d7f9]' : 'bg-stone-50 border-stone-200'
+          : task.is_active ? 'bg-[#f3faf4] border-[#bfe0c2]' : 'bg-stone-50 border-stone-200'
       } ${highlight ? 'shadow-sm' : ''}`}
     >
+      <div className={`p-4 pb-3${!task.is_active ? ' opacity-50' : ''}`}>
       {/* ── Person + type ── */}
       <div className="flex items-center gap-1.5 text-sm text-stone-500 mb-1">
         <span>{personLine}</span>
@@ -86,9 +87,10 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
           </>
         )}
       </div>
+      </div>
 
       {/* ── Footer ── */}
-      <div className="flex items-center justify-end gap-2 pt-3 border-t border-white/60">
+      <div className="flex items-center justify-end gap-2 px-4 pb-4 pt-3 border-t border-white/60">
         {!task.is_active && (
           <span className="text-xs font-semibold text-stone-400 bg-stone-100 px-2 py-0.5 rounded-md ml-auto">סגורה</span>
         )}
