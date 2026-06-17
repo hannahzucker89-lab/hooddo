@@ -51,7 +51,7 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
       <div className="flex items-center gap-1.5 text-sm text-stone-500 mb-1">
         <span>{personLine}</span>
         <span className="text-stone-300">·</span>
-        <span className={`font-semibold ${isOffer ? 'text-[#5c6bc0]' : 'text-[#1b5e20]'}`}>
+        <span className={`font-semibold ${!task.is_active ? 'text-stone-400' : isOffer ? 'text-[#5c6bc0]' : 'text-[#1b5e20]'}`}>
           {isOffer ? 'הצעה' : 'בקשה'}
         </span>
       </div>

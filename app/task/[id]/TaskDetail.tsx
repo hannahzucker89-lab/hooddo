@@ -184,7 +184,7 @@ if (phone) {
       <div className="pt-6 pb-4 flex items-center gap-3">
         <button onClick={() => router.back()} className="text-stone-400 text-2xl leading-none">‹</button>
         <h1 className="text-lg font-extrabold text-stone-900 flex-1">
-          {isOwner ? 'ניהול' : isOffer ? 'פרטי ההצעה' : 'פרטי הבקשה'}
+          {!task.is_active ? (isOffer ? 'פרטי ההצעה' : 'פרטי הבקשה') : isOwner ? 'ניהול' : isOffer ? 'פרטי ההצעה' : 'פרטי הבקשה'}
         </h1>
       <button
   onClick={handleShare}
@@ -250,23 +250,6 @@ if (phone) {
             className="mt-3 w-full border border-stone-200 text-stone-500 font-semibold py-3 rounded-full text-sm active:scale-95 transition-transform"
           >
             חזרה לפרסומים שלי
-          </button>
-          <button
-            onClick={() => {
-              const params = new URLSearchParams({
-                type: task.type ?? 'task',
-                title: task.title,
-                description: task.description ?? '',
-                category: task.category ?? '',
-                reward: String(task.reward_ils ?? 0),
-                duration: String(task.duration_minutes ?? 0),
-                time_option: task.time_option ?? '',
-              })
-              router.push(`/new?${params.toString()}`)
-            }}
-            className="w-full bg-[#1b5e20] text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform"
-          >
-            פרסום מחדש
           </button>
           <button
             onClick={() => {
