@@ -251,6 +251,40 @@ if (phone) {
           >
             חזרה לפרסומים שלי
           </button>
+          <button
+            onClick={() => {
+              const params = new URLSearchParams({
+                type: task.type ?? 'task',
+                title: task.title,
+                description: task.description ?? '',
+                category: task.category ?? '',
+                reward: String(task.reward_ils ?? 0),
+                duration: String(task.duration_minutes ?? 0),
+                time_option: task.time_option ?? '',
+              })
+              router.push(`/new?${params.toString()}`)
+            }}
+            className="w-full bg-[#1b5e20] text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform"
+          >
+            פרסום מחדש
+          </button>
+          <button
+            onClick={() => {
+              const params = new URLSearchParams({
+                type: task.type ?? 'task',
+                title: task.title,
+                description: task.description ?? '',
+                category: task.category ?? '',
+                reward: String(task.reward_ils ?? 0),
+                duration: String(task.duration_minutes ?? 0),
+                time_option: task.time_option ?? '',
+              })
+              router.push(`/new?${params.toString()}`)
+            }}
+            className="w-full bg-[#1b5e20] text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform"
+          >
+            פרסום מחדש
+          </button>
         </div>
       ) : isOwner ? (
         <button

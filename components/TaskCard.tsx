@@ -99,7 +99,7 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
               isOffer ? 'text-[#5c6bc0]' : 'text-[#2e7d32]'
             }`}
           >
-            {isOffer ? 'ניהול ההצעה' : 'ניהול הבקשה'}
+            {!task.is_active ? (isOffer ? 'צפייה בהצעה' : 'צפייה בבקשה') : (isOffer ? 'ניהול ההצעה' : 'ניהול הבקשה')}
           </Link>
         ) : (
           <Link
