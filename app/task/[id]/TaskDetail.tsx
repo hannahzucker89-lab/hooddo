@@ -46,9 +46,10 @@ const { data: phoneData } = await supabase.rpc('get_task_phone', { task_id: id }
 const phone = phoneData?.[0]?.phone
 if (phone) {
   const isOffer = data.type === 'offer'
+  const categoryPart = data.category ? ` בקטגוריית ${data.category}` : ''
   const msg = isOffer
-    ? `היי ${data.display_name}, ראיתי את ההצעה שלך ב-HoodDo ואשמח לקבל עזרה 🙏`
-    : `היי ${data.display_name}, ראיתי את הבקשה שלך ב-HoodDo ואשמח לעזור 🙏`
+    ? `היי, ראיתי ב-HoodDo את ההצעה שלך: "${data.title}"${categoryPart}. אשמח לשמוע עוד 🙂`
+    : `היי, ראיתי ב-HoodDo את הבקשה שלך: "${data.title}"${categoryPart}. אשמח לעזור 🙂`
   setWhatsappUrl(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`)
 }
       const token = localStorage.getItem(`hooddo_token_${data.id}`)
