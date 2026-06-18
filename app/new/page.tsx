@@ -119,6 +119,11 @@ useEffect(() => {
     setError('')
 const { data: { user } } = await supabase.auth.getUser()
 if (!user) { setShowAuth(true); return }
+const existingVerbForm = user.user_metadata?.verb_form
+if (existingVerbForm !== 'male' && existingVerbForm !== 'female') {
+  setShowVerbForm(true)
+  return
+}
 
 if (!category) {
   setCategoryError(true)
