@@ -131,11 +131,11 @@ if (!category) {
 
     let dur = 0
     if (isTask) {
-      dur = parseInt(duration)
-      if (!duration || isNaN(dur) || dur < 5 || dur > 120) {
-        setError('יש להזין משך זמן (5–120 דקות)')
+      if (!duration) {
+        setError('יש לבחור משך זמן')
         return
       }
+      dur = duration === 'unknown' ? 0 : parseInt(duration)
     }
 
     if (!name.trim()) { setError('יש להזין שם או כינוי'); return }
@@ -348,57 +348,72 @@ router.push(`/task/${data.id}?new=1`)
         {/* ── Duration — tasks only ── */}
 {isTask && (
   <Field label="כמה זמן בערך?">
-    <div className="flex items-center justify-between mb-1">
-      <span className="text-xs text-stone-400">דקות בודדות</span>
-      <span className="text-sm font-semibold text-stone-700">
-        {duration ? (Number(duration) >= 60
-          ? `${Math.floor(Number(duration) / 60)}:${String(Number(duration) % 60).padStart(2, '0')} שעות`
-          : `${duration} דקות`)
-          : 'בחר משך'}
-      </span>
-      <span className="text-xs text-stone-400">כמה שעות</span>
+    <div className="flex flex-wrap gap-2">
+      {[
+        { label: 'עד 30 דקות', value: '20' },
+        { label: '30–60 דקות', value: '45' },
+        { label: 'שעה–שעתיים', value: '90' },
+        { label: 'יותר משעתיים', value: '150' },
+        { label: 'לא ידוע עדיין', value: 'unknown' },
+      ].map(({ label, value }) => (
+        <button
+          key={value}
+          type="button"
+          onClick={() => setDuration(value)}
+          className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
+            duration === value
+              ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+              : 'bg-white text-stone-600 border-stone-200'
+          }`}
+        >
+          {label}
+        </button>
+      ))}
     </div>
-    <input
-      type="range"
-      min={5}
-      max={120}
-      step={5}
-      value={duration || 30}
-      onChange={(e) => setDuration(e.target.value)}
-      className="w-full"
-      style={{ direction: 'ltr', accentColor: isTask ? '#1b5e20' : '#5c6bc0' }}
-    />
   </Field>
 )}
         {/* ── Reward ── */}
         <Field label="תמורה">
-          <input
-            type="range"
-            min={0}
-            max={200}
-            step={5}
-            value={reward}
-            onChange={(e) => setReward(Number(e.target.value))}
-            className="w-full accent-[#1b5e20]"
-            dir="ltr"
-          />
-          <div className="flex justify-between text-xs text-stone-400 mt-1">
-            <span>200 ₪</span>
-            <span>ללא תמורה</span>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: '🤝 ללא תמורה', value: 0 },
+              { label: '🪙 20', value: 20 },
+              { label: '🪙 40', value: 40 },
+              { label: '🪙 60', value: 60 },
+              { label: '🪙 80', value: 80 },
+              { label: '✏️ אחר', value: -1 },
+            ].map(({ label, value }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setReward(value)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
+                  (value === -1 && reward > 80 && reward !== 0)
+                    ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+                    : reward === value
+                    ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+                    : 'bg-white text-stone-600 border-stone-200'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-xs text-stone-400 shrink-0">סכום אחר:</span>
-            <input
-              type="number"
-              min={0}
-              max={9999}
-              value={reward === 0 ? '' : reward}
-              onChange={(e) => setReward(Number(e.target.value) || 0)}
-              placeholder="הקלד סכום"
-              className="input py-2 text-sm"
-            />
-            <span className="text-xs text-stone-400 shrink-0">₪</span>
-          </div>
+          {(reward > 80 || reward === -1) && reward !== 0 && (
+            <div className="flex items-center gap-2 mt-3">
+              <input
+                type="number"
+                min={0}
+                max={9999}
+                value={reward === -1 ? '' : reward}
+                onChange={(e) => setReward(Number(e.target.value) || 0)}
+                placeholder="הזינו סכום"
+                className="input py-2 text-sm"
+                autoFocus
+              />
+              <span className="text-sm text-stone-400 shrink-0">₪</span>
+            </div>
+          )}
         </Field>
 
         {/* ── Location ── */}

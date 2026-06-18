@@ -77,7 +77,7 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
         {!isOffer && (
           <>
             <span className="text-stone-300">•</span>
-            <span>⏱️ כ-{task.duration_minutes} דקות{task.time_option ? ` · ${TIME_LABEL[task.time_option] ?? task.time_option}` : ''}</span>
+            <span>{task.duration_minutes === 0 ? '⏱️ בתיאום' : `⏱️ כ-${task.duration_minutes} דקות${task.time_option ? ` · ${TIME_LABEL[task.time_option] ?? task.time_option}` : ''}`}</span>
           </>
         )}
         {distanceMeters !== undefined && (
