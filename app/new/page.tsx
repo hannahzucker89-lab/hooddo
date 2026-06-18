@@ -323,14 +323,21 @@ router.push(`/task/${data.id}?new=1`)
       </button>
     </div>
     {exactDate && (
-      <input
-        type="date"
-        value={exactDate}
-        onChange={(e) => setExactDate(e.target.value)}
-        min={new Date().toISOString().split('T')[0]}
-        className="input mt-2"
-        dir="ltr"
-      />
+      <>
+        <input
+          type="date"
+          value={exactDate}
+          onChange={(e) => setExactDate(e.target.value)}
+          min={new Date().toISOString().split('T')[0]}
+          className="input mt-2"
+          dir="ltr"
+        />
+        {exactDate && (
+          <p className="text-sm text-stone-600 mt-1 font-medium">
+            📅 {new Date(exactDate + 'T00:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}
+          </p>
+        )}
+      </>
     )}
     {/* מיקרוקופי */}
     <p className="text-xs text-stone-400 mt-2">

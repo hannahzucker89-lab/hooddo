@@ -78,6 +78,15 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
           <>
             <span className="text-stone-300">•</span>
             <span>{task.duration_minutes === 0 ? '⏱️ בתיאום' : `⏱️ כ-${task.duration_minutes} דקות${task.time_option ? ` · ${TIME_LABEL[task.time_option] ?? task.time_option}` : ''}`}</span>
+            {task.exact_date && (
+              <span>📅 {new Date(task.exact_date + 'T00:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}</span>
+            )}
+            {task.exact_date && (
+              <span>📅 {new Date(task.exact_date + 'T00:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}</span>
+            )}
+            {task.exact_date && (
+              <span>📅 {new Date(task.exact_date + 'T00:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}</span>
+            )}
           </>
         )}
         {distanceMeters !== undefined && (
