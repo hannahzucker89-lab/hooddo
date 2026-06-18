@@ -51,7 +51,7 @@ export default function PhoneAuthModal({ onSuccess, onClose }: Props) {
 
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-extrabold text-stone-900">
-            {step === 'phone' ? 'אימות מספר טלפון' : 'הזיני את הקוד'}
+            {step === 'phone' ? 'אימות מספר טלפון' : 'הזינו את הקוד'}
           </h2>
           <button onClick={onClose} className="text-stone-400 text-xl">✕</button>
         </div>

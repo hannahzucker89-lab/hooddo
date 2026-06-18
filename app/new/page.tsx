@@ -65,6 +65,7 @@ const [exactDate, setExactDate] = useState('')
   const [error, setError] = useState('')
   const submitCooldown = useRef(false)
 const [showAuth, setShowAuth] = useState(false)
+  const [showVerbForm, setShowVerbForm] = useState(false)
 
   const isTask = itemType === 'task'
 
@@ -548,12 +549,49 @@ router.push(`/task/${data.id}?new=1`)
         .input:focus { border-color: #1b5e20; }
         .input::placeholder { color: #a8a29e; }
       `}</style>
+{showVerbForm && (
+  <div className="fixed inset-0 bg-black/40 z-50 flex items-end justify-center">
+    <div className="bg-white rounded-t-3xl w-full max-w-md px-6 pt-6 pb-10">
+      <h2 className="text-xl font-extrabold text-stone-900 mb-2">בחרו את הניסוח שמתאים לכם</h2>
+      <p className="text-sm text-stone-500 mb-6 leading-relaxed">כך הפרסומים שלכם יוצגו בפיד. אפשר לשנות בהמשך.</p>
+      <div className="space-y-3">
+        <button
+          onClick={async () => {
+            await supabase.auth.updateUser({ data: { verb_form: 'male' } })
+            setShowVerbForm(false)
+            handleSubmit()
+          }}
+          className="w-full text-right bg-white border border-stone-200 rounded-2xl px-6 py-5 active:scale-95 transition-transform"
+        >
+          <div className="text-lg font-bold text-stone-900">מחפש / מציע</div>
+        </button>
+        <button
+          onClick={async () => {
+            await supabase.auth.updateUser({ data: { verb_form: 'female' } })
+            setShowVerbForm(false)
+            handleSubmit()
+          }}
+          className="w-full text-right bg-white border border-stone-200 rounded-2xl px-6 py-5 active:scale-95 transition-transform"
+        >
+          <div className="text-lg font-bold text-stone-900">מחפשת / מציעה</div>
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 {showAuth && (
   <PhoneAuthModal
-    onSuccess={(verifiedPhone) => { 
+    onSuccess={async (verifiedPhone) => {
   setPhone(verifiedPhone)
   setShowAuth(false)
-  handleSubmit() 
+  const { data: { user } } = await supabase.auth.getUser()
+  const existing = user?.user_metadata?.verb_form
+  if (existing === 'male' || existing === 'female') {
+    handleSubmit()
+  } else {
+    setShowVerbForm(true)
+  }
 }}
     onClose={() => setShowAuth(false)}
   />
