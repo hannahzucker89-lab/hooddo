@@ -143,12 +143,13 @@ export default function HomePage() {
   }
 
   function isExpired(item: Task): boolean {
+    if (item.type === 'offer') return false
     const created = new Date(item.created_at).getTime()
     const now = Date.now()
     const hours = (now - created) / (1000 * 60 * 60)
+    if (item.exact_date) return new Date(item.exact_date) < new Date(new Date().toDateString())
     if (item.time_option === 'מיידי') return hours > 25
     if (item.time_option === 'השבוע') return hours > 24 * 8
-    if (item.exact_date) return new Date(item.exact_date) < new Date(new Date().toDateString())
     return false
   }
 

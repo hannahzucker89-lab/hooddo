@@ -41,7 +41,7 @@ function NewTaskForm() {
   const categoryRef = useRef<HTMLDivElement>(null)
   const [title, setTitle] = useState('')
 const [description, setDescription] = useState('')
-  const [timeOption, setTimeOption] = useState<TimeOption>('השבוע')
+  const [timeOption, setTimeOption] = useState<TimeOption>('גמיש')
 const [exactDate, setExactDate] = useState('')
   const [duration, setDuration] = useState('')
   const [reward, setReward] = useState(25)

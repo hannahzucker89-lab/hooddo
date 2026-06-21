@@ -34,9 +34,21 @@ export default function MyTasksPage() {
     init()
   }, [])
 
+  function isExpired(item: Task): boolean {
+    if (item.type === 'offer') return false
+    const created = new Date(item.created_at).getTime()
+    const now = Date.now()
+    const hours = (now - created) / (1000 * 60 * 60)
+    if (item.exact_date) return new Date(item.exact_date) < new Date(new Date().toDateString())
+    if (item.time_option === 'מיידי') return hours > 25
+    if (item.time_option === 'השבוע') return hours > 24 * 8
+    return false
+  }
+
   const filterFn = (item: Task) => filter === 'all' || item.type === filter
 
-  const activeItems = items.filter((item) => item.is_active && filterFn(item))
+  const activeItems = items.filter((item) => item.is_active && !isExpired(item) && filterFn(item))
+  const expiredItems = items.filter((item) => item.is_active && isExpired(item) && filterFn(item))
   const closedItems = items.filter((item) => !item.is_active && filterFn(item))
 
   const emptyLabel = filter === 'task'
@@ -46,6 +58,7 @@ export default function MyTasksPage() {
     : 'פרסומים שנסגרו יופיעו כאן'
 
   const activeHeader = filter === 'task' ? 'בקשות פעילות' : filter === 'offer' ? 'הצעות פעילות' : 'פעילים'
+  const expiredHeader = filter === 'offer' ? 'הצעות שפג תוקפן' : 'פג תוקף'
   const closedHeader = filter === 'task' ? 'בקשות שנסגרו' : filter === 'offer' ? 'הצעות שנסגרו' : 'נסגרו'
 
   return (
@@ -92,7 +105,7 @@ export default function MyTasksPage() {
             ))}
           </div>
 
-          {activeItems.length === 0 && closedItems.length === 0 ? (
+          {activeItems.length === 0 && expiredItems.length === 0 && closedItems.length === 0 ? (
             <EmptyState />
           ) : (
             <>
@@ -108,6 +121,18 @@ export default function MyTasksPage() {
                   </div>
                 )}
               </div>
+
+              {expiredItems.length > 0 && (
+                <div className="mt-6">
+                  <h2 className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">{expiredHeader}</h2>
+                  <p className="text-xs text-stone-400 mb-3">החלון שבחרת חלף — הפרסום כבר לא מופיע בפיד לשכנים</p>
+                  <div className="space-y-3">
+                    {expiredItems.map((item) => (
+                      <TaskCard key={item.id} task={item} variant="owner" />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="mt-6">
                 <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">{closedHeader}</h2>
