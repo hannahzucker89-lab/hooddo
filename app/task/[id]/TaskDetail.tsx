@@ -7,6 +7,7 @@ import { getSavedPhone } from '@/utils/storage'
 import { normalizeIsraeliPhone } from '@/utils/phone'
 import { calculateDistanceMeters, formatDistance } from '@/utils/distance'
 import { getMyCorner } from '@/utils/corner'
+import PhoneAuthModal from '@/components/PhoneAuthModal'
 
 type ViewerLocation = { lat: number; lng: number }
 
@@ -29,6 +30,8 @@ export default function TaskDetail() {
   const [distance, setDistance] = useState<number | null>(null)
   const [shared, setShared] = useState(false)
 const [whatsappUrl, setWhatsappUrl] = useState<string>('#')
+const [viewerVerified, setViewerVerified] = useState(false)
+const [showViewerAuth, setShowViewerAuth] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -42,20 +45,24 @@ const [whatsappUrl, setWhatsappUrl] = useState<string>('#')
 
       setTask(data as Task)
 
-const { data: phoneData } = await supabase.rpc('get_task_phone', { task_id: id })
-const phone = phoneData?.[0]?.phone
-if (phone) {
-  const isOffer = data.type === 'offer'
-  const categoryPart = data.category ? ` בקטגוריית ${data.category}` : ''
-  const msg = isOffer
-    ? `היי, ראיתי ב-HoodDo את ההצעה שלך: "${data.title}"${categoryPart}. אשמח לשמוע עוד 🙂`
-    : `היי, ראיתי ב-HoodDo את הבקשה שלך: "${data.title}"${categoryPart}. אשמח לעזור 🙂`
-  setWhatsappUrl(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`)
-}
       const token = localStorage.getItem(`hooddo_token_${data.id}`)
       const { data: { user } } = await supabase.auth.getUser()
       setIsOwner(!!token || (!!user && user.id === (data as Task).user_id))
+      setViewerVerified(!!user)
       setLoading(false)
+
+      if (user) {
+        const { data: phoneData } = await supabase.rpc('get_task_phone', { task_id: id })
+        const phone = phoneData?.[0]?.phone
+        if (phone) {
+          const isOffer = data.type === 'offer'
+          const categoryPart = data.category ? ` בקטגוריית ${data.category}` : ''
+          const msg = isOffer
+            ? `היי, ראיתי ב-HoodDo את ההצעה שלך: "${data.title}"${categoryPart}. אשמח לשמוע עוד 🙂`
+            : `היי, ראיתי ב-HoodDo את הבקשה שלך: "${data.title}"${categoryPart}. אשמח לעזור 🙂`
+          setWhatsappUrl(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`)
+        }
+      }
 
       const corner = await getMyCorner()
       if (corner && data.lat && data.lng) {
@@ -64,6 +71,20 @@ if (phone) {
     }
     load()
   }, [id])
+
+  async function fetchPhoneAfterAuth() {
+    if (!task) return
+    const { data: phoneData } = await supabase.rpc('get_task_phone', { task_id: task.id })
+    const phone = phoneData?.[0]?.phone
+    if (phone) {
+      const isOffer = task.type === 'offer'
+      const categoryPart = task.category ? ` בקטגוריית ${task.category}` : ''
+      const msg = isOffer
+        ? `היי, ראיתי ב-HoodDo את ההצעה שלך: "${task.title}"${categoryPart}. אשמח לשמוע עוד 🙂`
+        : `היי, ראיתי ב-HoodDo את הבקשה שלך: "${task.title}"${categoryPart}. אשמח לעזור 🙂`
+      setWhatsappUrl(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`)
+    }
+  }
 
   async function closeTask() {
   if (!task || closing) return
@@ -278,7 +299,7 @@ if (phone) {
         >
           {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
         </button>
-      ) : (
+      ) : viewerVerified ? (
         <a
           href={whatsappUrl}
           target="_blank"
@@ -287,6 +308,24 @@ if (phone) {
         >
           💬 יצירת קשר
         </a>
+      ) : (
+        <button
+          onClick={() => setShowViewerAuth(true)}
+          className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
+        >
+          💬 יצירת קשר
+        </button>
+      )}
+
+      {showViewerAuth && (
+        <PhoneAuthModal
+          onSuccess={async () => {
+            setShowViewerAuth(false)
+            setViewerVerified(true)
+            await fetchPhoneAfterAuth()
+          }}
+          onClose={() => setShowViewerAuth(false)}
+        />
       )}
 
     </main>
