@@ -8,12 +8,13 @@ export default function PublishPage() {
   const [pendingType, setPendingType] = useState<'task' | 'offer' | null>(null)
 
   async function handleTypeSelect(type: 'task' | 'offer') {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const localPref = localStorage.getItem('hooddo_pending_verb_form')
+    if (localPref === 'male' || localPref === 'female') {
       router.push(`/new?type=${type}`)
       return
     }
-    const existing = user.user_metadata?.verb_form
+    const { data: { user } } = await supabase.auth.getUser()
+    const existing = user?.user_metadata?.verb_form
     if (existing === 'male' || existing === 'female') {
       router.push(`/new?type=${type}`)
       return
@@ -22,7 +23,11 @@ export default function PublishPage() {
   }
 
   async function handleVerbForm(form: 'male' | 'female') {
-    await supabase.auth.updateUser({ data: { verb_form: form } })
+    localStorage.setItem('hooddo_pending_verb_form', form)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.auth.updateUser({ data: { verb_form: form } })
+    }
     router.push(`/new?type=${pendingType}`)
   }
 
