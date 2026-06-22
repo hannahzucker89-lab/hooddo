@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 const KEY_DONE = 'hooddo_onboarding_done_v2'
 
@@ -21,15 +21,43 @@ const EXAMPLES = [
 
 export default function Onboarding({ onComplete }: Props) {
   const [screen, setScreen] = useState<1 | 2 | 3>(1)
-  const [activeTab, setActiveTab] = useState<'tasks' | 'offers'>('tasks')
+  const touchStartX = useRef<number | null>(null)
 
   function finish() {
     localStorage.setItem(KEY_DONE, 'true')
     onComplete()
   }
 
+  function next() {
+    if (screen < 3) setScreen((s) => (s + 1) as 1 | 2 | 3)
+    else finish()
+  }
+
+  function prev() {
+    if (screen > 1) setScreen((s) => (s - 1) as 1 | 2 | 3)
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartX.current = e.touches[0].clientX
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartX.current === null) return
+    const diff = touchStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) next()
+      else prev()
+    }
+    touchStartX.current = null
+  }
+
   return (
-    <div className="fixed inset-0 z-50 bg-[#f9f7f4] flex flex-col" dir="rtl">
+    <div
+      className="fixed inset-0 z-50 bg-[#f9f7f4] flex flex-col"
+      dir="rtl"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
       <div className="flex-1 flex flex-col justify-between max-w-md mx-auto w-full px-6 py-10">
 
         {/* Progress dots */}
@@ -37,7 +65,8 @@ export default function Onboarding({ onComplete }: Props) {
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
+              onClick={() => setScreen(s as 1 | 2 | 3)}
+              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
                 s === screen ? 'w-8 bg-[#1b5e20]' : s < screen ? 'w-4 bg-[#a5d6a7]' : 'w-4 bg-stone-200'
               }`}
             />
@@ -93,29 +122,19 @@ export default function Onboarding({ onComplete }: Props) {
         </div>
 
         {/* CTA */}
-        <div className="mt-8">
-          {screen === 1 && (
+        <div className="mt-8 space-y-3">
+          <button
+            onClick={next}
+            className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
+          >
+            {screen === 3 ? 'יאללה' : 'המשך'}
+          </button>
+          {screen > 1 && (
             <button
-              onClick={() => setScreen(2)}
-              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
+              onClick={prev}
+              className="w-full text-stone-400 text-sm py-2"
             >
-              המשך
-            </button>
-          )}
-          {screen === 2 && (
-            <button
-              onClick={() => setScreen(3)}
-              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
-            >
-              המשך
-            </button>
-          )}
-          {screen === 3 && (
-            <button
-              onClick={finish}
-              className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
-            >
-              יאללה
+              חזרה
             </button>
           )}
         </div>
