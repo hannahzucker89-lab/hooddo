@@ -60,6 +60,13 @@ export default function Onboarding({ onComplete }: Props) {
     >
       <div className="flex-1 flex flex-col justify-between max-w-md mx-auto w-full px-6 py-10">
 
+        {/* Back arrow */}
+        <div className="h-8 mb-2">
+          {screen > 1 && (
+            <button onClick={prev} className="text-stone-400 text-2xl leading-none">‹</button>
+          )}
+        </div>
+
         {/* Progress dots */}
         <div className="flex gap-2 justify-center mb-8">
           {[1, 2, 3].map((s) => (
@@ -129,14 +136,7 @@ export default function Onboarding({ onComplete }: Props) {
           >
             {screen === 3 ? 'יאללה' : 'המשך'}
           </button>
-          {screen > 1 && (
-            <button
-              onClick={prev}
-              className="w-full text-stone-400 text-sm py-2"
-            >
-              חזרה
-            </button>
-          )}
+
         </div>
 
       </div>
