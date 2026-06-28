@@ -13,6 +13,7 @@ interface Props {
 export default function ChooseCornerScreen({ onDone }: Props) {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsLoading, setGpsLoading] = useState(false)
+  const [gpsError, setGpsError] = useState(false)
   const [saving, setSaving] = useState(false)
 
   async function useGPS() {
@@ -23,7 +24,7 @@ export default function ChooseCornerScreen({ onDone }: Props) {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         setGpsLoading(false)
       },
-      () => { setGpsLoading(false) },
+      () => { setGpsLoading(false); setGpsError(true) },
       { timeout: 10000, enableHighAccuracy: false }
     )
   }
@@ -65,6 +66,12 @@ export default function ChooseCornerScreen({ onDone }: Props) {
       >
         {gpsLoading ? <span className="animate-pulse">מאתר מיקום...</span> : <>📍 השתמש במיקום הנוכחי</>}
       </button>
+      {gpsError && (
+        <p className="text-sm text-stone-500 mt-2 text-center leading-relaxed">
+          הדפדפן לא הצליח לאתר אתכם אוטומטית.
+          אפשר לחפש כתובת בשורת החיפוש או ללחוץ על המפה.
+        </p>
+      )}
 
       <button
         type="button"

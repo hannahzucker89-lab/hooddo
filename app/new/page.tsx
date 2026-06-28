@@ -43,8 +43,8 @@ function NewTaskForm() {
 const [description, setDescription] = useState('')
   const [timeOption, setTimeOption] = useState<TimeOption>('גמיש')
 const [exactDate, setExactDate] = useState('')
-  const [duration, setDuration] = useState('')
-  const [reward, setReward] = useState(25)
+  const [duration, setDuration] = useState('20')
+  const [reward, setReward] = useState<number | null>(null)
 
   // ── My Corner state ──
   const [myCorner, setMyCornerState] = useState<Corner | null | undefined>(undefined) // undefined = loading
@@ -129,18 +129,15 @@ if (!category) {
   setTimeout(() => setCategoryError(false), 2000)
   return
 }
-    if (title.trim().length < 5) { setError('יש לתאר את הפריט (לפחות 5 תווים)'); return }
+    if (title.trim().length < 5) { setError('יש למלא כותרת (לפחות 5 תווים)'); return }
     if (title.trim().length > 120) { setError('תיאור ארוך מדי (עד 120 תווים)'); return }
 
     let dur = 0
     if (isTask) {
-      if (!duration) {
-        setError('יש לבחור משך זמן')
-        return
-      }
-      dur = duration === 'unknown' ? 0 : parseInt(duration)
+      dur = duration === 'unknown' ? 0 : parseInt(duration || '20')
     }
 
+    if (reward === null) { setError('יש לבחור תמורה'); return }
     if (!name.trim()) { setError('יש להזין שם או כינוי'); return }
     const usingCorner = myCorner && !useOtherLocation
     if (!usingCorner && !gpsCoords && !mapCoords && !addressText.trim()) {
@@ -175,7 +172,7 @@ if (!category) {
   description: description.trim() || null,
   time_option: timeOption,
   duration_minutes: isTask ? dur : 0,
-  reward_ils: reward,
+  reward_ils: reward ?? 0,
   display_name: name.trim(),
   phone: user.phone ?? normalizeIsraeliPhone(phone),
   location_source: usingCorner ? 'corner' : (gpsCoords ? 'gps' : 'manual'),
@@ -222,7 +219,7 @@ router.push(`/task/${data.id}?new=1`)
   }
 
   const categories = CATEGORIES[itemType]
-  const rewardLabel = reward === 0 ? 'ללא תמורה' : `${reward} ₪`
+  const rewardLabel = reward === null ? '' : reward === 0 ? 'ללא תמורה' : `${reward} ₪`
   const isLoading = submitting || geocoding
 
   return (
@@ -386,19 +383,19 @@ router.push(`/task/${data.id}?new=1`)
         <Field label="תמורה">
           <div className="flex flex-wrap gap-2">
             {[
-              { label: '🤝 ללא תמורה', value: 0 },
-              { label: '🪙 20', value: 20 },
-              { label: '🪙 40', value: 40 },
-              { label: '🪙 60', value: 60 },
-              { label: '🪙 80', value: 80 },
-              { label: '✏️ אחר', value: -1 },
+              { label: 'ללא תמורה', value: 0 },
+              { label: '20 ₪', value: 20 },
+              { label: '40 ₪', value: 40 },
+              { label: '60 ₪', value: 60 },
+              { label: '80 ₪', value: 80 },
+              { label: 'אחר', value: -1 },
             ].map(({ label, value }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setReward(value)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
-                  (value === -1 && reward > 80 && reward !== 0)
+                  (value === -1 && reward !== null && reward > 80 && reward !== 0)
                     ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
                     : reward === value
                     ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
@@ -409,7 +406,7 @@ router.push(`/task/${data.id}?new=1`)
               </button>
             ))}
           </div>
-          {(reward > 80 || reward === -1) && reward !== 0 && (
+          {reward !== null && (reward > 80 || reward === -1) && reward !== 0 && (
             <div className="flex items-center gap-2 mt-3">
               <input
                 type="number"

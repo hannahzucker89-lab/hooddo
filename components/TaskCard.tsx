@@ -27,9 +27,18 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
 
   useEffect(() => {
     const saved = getSavedPhone()
-    if (!saved) return
-    setIsOwner(normalizeIsraeliPhone(saved) === normalizeIsraeliPhone(task.phone ?? ''))
-  }, [task.phone])
+    if (saved && task.phone && normalizeIsraeliPhone(saved) === normalizeIsraeliPhone(task.phone)) {
+      setIsOwner(true)
+      return
+    }
+    if (task.user_id) {
+      import('@/lib/supabase').then(({ supabase }) => {
+        supabase.auth.getUser().then(({ data: { user } }) => {
+          if (user && user.id === task.user_id) setIsOwner(true)
+        })
+      })
+    }
+  }, [task.phone, task.user_id])
 
   const personLine = task.verb_form
     ? `${task.display_name} ${

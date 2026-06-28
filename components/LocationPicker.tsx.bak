@@ -17,7 +17,6 @@ export default function LocationPicker({ onSelect, selected }: Props) {
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [searchError, setSearchError] = useState('')
-  const [results, setResults] = useState<{ lat: number; lng: number; display_name: string }[]>([])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -73,36 +72,30 @@ export default function LocationPicker({ onSelect, selected }: Props) {
     if (query.trim().length < 2) return
     setSearching(true)
     setSearchError('')
-    setResults([])
     try {
       const res = await fetch(`/api/geocode?address=${encodeURIComponent(query)}`)
       const data = await res.json()
-      if (!res.ok || !data.results?.length) {
-        setSearchError('לא הצלחנו למצוא את הכתובת. נסו לכתוב שם רחוב ועיר (למשל: דיזנגוף 50, תל אביב), או לבחור את המיקום ישירות על המפה.')
+      if (!res.ok || !data.lat) {
+        setSearchError('לא נמצאה כתובת. נסו ניסוח אחר.')
         return
       }
-      setResults(data.results)
+      const { lat, lng } = data
+      if (mapRef.current) {
+        mapRef.current.setView([lat, lng], 15)
+      }
+      import('leaflet').then((L) => {
+        if (markerRef.current) {
+          markerRef.current.setLatLng([lat, lng])
+        } else {
+          markerRef.current = L.marker([lat, lng]).addTo(mapRef.current)
+        }
+      })
+      onSelect({ lat, lng })
     } catch {
       setSearchError('שגיאה בחיפוש. נסו שוב.')
     } finally {
       setSearching(false)
     }
-  }
-
-  function selectResult(result: { lat: number; lng: number; display_name: string }) {
-    setResults([])
-    setQuery(result.display_name.split(',')[0])
-    if (mapRef.current) {
-      mapRef.current.setView([result.lat, result.lng], 15)
-    }
-    import('leaflet').then((L) => {
-      if (markerRef.current) {
-        markerRef.current.setLatLng([result.lat, result.lng])
-      } else {
-        markerRef.current = L.marker([result.lat, result.lng]).addTo(mapRef.current)
-      }
-    })
-    onSelect({ lat: result.lat, lng: result.lng })
   }
 
   return (
@@ -133,21 +126,6 @@ export default function LocationPicker({ onSelect, selected }: Props) {
         <p className="text-xs text-red-500 mb-2 text-right">{searchError}</p>
       )}
 
-      {results.length > 0 && (
-        <div className="border border-stone-200 rounded-xl overflow-hidden mb-3 bg-white shadow-sm">
-          {results.map((r, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => selectResult(r)}
-              className="w-full text-right px-4 py-3 text-sm text-stone-700 hover:bg-stone-50 border-b border-stone-100 last:border-0 leading-snug"
-            >
-              {r.display_name.split(',').slice(0, 2).join(',')}
-            </button>
-          ))}
-        </div>
-      )}
-
       <div
         ref={containerRef}
         className="w-full rounded-xl overflow-hidden border border-stone-200"
@@ -156,11 +134,6 @@ export default function LocationPicker({ onSelect, selected }: Props) {
       <p className="text-xs text-stone-400 mt-1.5 text-center">
         אפשר גם ללחוץ על המפה לדיוק המיקום
       </p>
-      {selected && (
-        <p className="text-xs text-stone-500 mt-1.5 text-center">
-          📍 המיקום שנבחר: {query || 'על פי המפה'}
-        </p>
-      )}
     </>
   )
 }

@@ -1,0 +1,424 @@
+'use client'
+
+import Link from 'next/link'
+import { supabase, type Task, CATEGORIES_LIST } from '@/lib/supabase'
+import TaskCard from '@/components/TaskCard'
+import { calculateDistanceMeters } from '@/utils/distance'
+import { useEffect, useState, useRef } from 'react'
+import HamburgerMenu from '@/components/HamburgerMenu'
+import ChooseCornerScreen from '@/components/ChooseCornerScreen'
+import { getMyCorner, type Corner } from '@/utils/corner'
+
+type FeedFilter = 'all' | 'tasks' | 'offers'
+
+const HINT_KEY = 'hooddo_hints_done_v2'
+
+function radiusLabel(meters: number): string {
+  if (meters < 1000) return `פרסומים עד ${meters} מ׳ ממך`
+  const km = meters / 1000
+  return `פרסומים עד ${km % 1 === 0 ? km : km.toFixed(1)} ק״מ ממך`
+}
+
+function SpeechBubble({ hint, onDismiss, anchorRef }: {
+  hint: 'distance' | 'filter'
+  onDismiss: () => void
+  anchorRef: React.RefObject<HTMLElement | HTMLDivElement>
+}) {
+  const [top, setTop] = useState(200)
+
+  useEffect(() => {
+    if (anchorRef.current) {
+      const rect = anchorRef.current.getBoundingClientRect()
+      const offset = hint === 'distance' ? 12 : 8
+      setTop(rect.bottom + offset)
+    }
+  }, [anchorRef, hint])
+
+  const text = {
+    'distance': 'אפשר לבחור את המרחק שנוח לך',
+    'filter': 'אפשר לסנן לפי מה שרלוונטי לך',
+  }[hint]
+
+  return (
+    <div
+      className="fixed inset-0 z-50"
+      style={{ background: 'rgba(0,0,0,0.15)', animation: 'fadeIn 0.25s ease' }}
+      onClick={onDismiss}
+      dir="rtl"
+    >
+      <div
+        className="absolute"
+        style={{ top: `${top}px`, left: '50%', transform: 'translateX(-50%)', width: '280px' }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-center mb-0">
+          <div style={{
+            width: 0, height: 0,
+            borderLeft: '8px solid transparent',
+            borderRight: '8px solid transparent',
+            borderBottom: '8px solid white',
+          }} />
+        </div>
+        <div
+          className="bg-white rounded-2xl px-4 py-3 flex items-center justify-between gap-3"
+          style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
+        >
+          <p className="text-sm text-stone-700 flex-1">{text}</p>
+          <button
+            onClick={onDismiss}
+            className="text-xs font-bold text-[#1b5e20] shrink-0 active:scale-95 transition-transform whitespace-nowrap"
+          >
+            הבנתי
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function HomePage() {
+  const [allItems, setAllItems] = useState<Task[]>([])
+  const [loading, setLoading] = useState(true)
+  const [feedFilter, setFeedFilter] = useState<FeedFilter>('all')
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [myCorner, setMyCornerState] = useState<Corner | null>(null)
+  const [cornerLoading, setCornerLoading] = useState(true)
+  const [radius, setRadius] = useState(2000)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('hooddo_radius')
+    if (saved) setRadius(Number(saved))
+  }, [])
+
+  const [rewardFilter, setRewardFilter] = useState<'all' | 'paid' | 'free'>('all')
+  const [showFilters, setShowFilters] = useState(false)
+  const [hint, setHint] = useState<'distance' | 'filter' | null>(null)
+  const sliderRef = useRef<HTMLDivElement>(null)
+  const filterRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const onboardingDone = localStorage.getItem('hooddo_onboarding_done_v2')
+      const hintsDone = localStorage.getItem(HINT_KEY)
+      if (onboardingDone === 'true' && !hintsDone) setHint('distance')
+    }
+  }, [])
+
+  function dismissHint() {
+    if (hint === 'distance') {
+      setHint('filter')
+    } else {
+      setHint(null)
+      localStorage.setItem(HINT_KEY, 'true')
+    }
+  }
+
+  useEffect(() => { fetchAll() }, [])
+
+  async function fetchAll() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('tasks')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+    setAllItems(data ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    async function loadCorner() {
+      setCornerLoading(true)
+      const corner = await getMyCorner()
+      setMyCornerState(corner)
+      setCornerLoading(false)
+    }
+    loadCorner()
+  }, [])
+
+  function toggleCategory(label: string) {
+    setSelectedCategories(prev =>
+      prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label]
+    )
+  }
+
+  function isExpired(item: Task): boolean {
+    const created = new Date(item.created_at).getTime()
+    const now = Date.now()
+    const hours = (now - created) / (1000 * 60 * 60)
+    if (item.time_option === 'מיידי') return hours > 25
+    if (item.time_option === 'השבוע') return hours > 24 * 8
+    if (item.exact_date) return new Date(item.exact_date) < new Date(new Date().toDateString())
+    return false
+  }
+
+  const typeFiltered = allItems.filter((item) => {
+    if (isExpired(item)) return false
+    if (feedFilter === 'tasks') return item.type === 'task'
+    if (feedFilter === 'offers') return item.type === 'offer'
+    return true
+  })
+
+  const filtered = typeFiltered.filter((item) => {
+    if (selectedCategories.length > 0 && !selectedCategories.includes(item.category ?? '')) return false
+    if (rewardFilter === 'paid' && item.reward_ils === 0) return false
+    if (rewardFilter === 'free' && item.reward_ils > 0) return false
+    return true
+  })
+
+  const enriched = filtered
+    .map((item) => {
+      const dist =
+        myCorner && item.lat && item.lng
+          ? calculateDistanceMeters(myCorner.lat, myCorner.lng, item.lat, item.lng)
+          : null
+      return { item, dist }
+    })
+    .filter(({ dist }) => myCorner && dist != null ? dist <= radius : true)
+    .sort((a, b) => {
+      if (myCorner && a.dist != null && b.dist != null && a.dist !== b.dist)
+        return a.dist - b.dist
+      return new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime()
+    })
+
+  const nearbyEmpty = myCorner && enriched.length === 0 && typeFiltered.length > 0
+
+  if (!cornerLoading && !myCorner) {
+    return (
+      <ChooseCornerScreen
+        onDone={async () => {
+          const corner = await getMyCorner()
+          setMyCornerState(corner)
+        }}
+      />
+    )
+  }
+
+  return (
+    <main className="max-w-md mx-auto px-4 pb-28">
+
+      {/* ── Logo ── */}
+      <div className="pt-8 pb-0 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight text-stone-900">HoodDo 🏘️</h1>
+          <p className="text-sm font-medium text-stone-500 mt-1 mb-0">
+            מה קורה באזור שלך?
+          </p>
+        </div>
+        <HamburgerMenu />
+      </div>
+
+      <div className="mb-4" />
+
+      {/* ── Location + radius strip ── */}
+      <div className="mb-4 px-1" ref={sliderRef}>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-stone-400">
+            📍 הפינה שלי
+          </span>
+        </div>
+
+        <input
+          type="range"
+          min={200}
+          max={2000}
+          step={100}
+          onChange={(e) => {
+            const val = 2200 - Number(e.target.value)
+            setRadius(val)
+            localStorage.setItem('hooddo_radius', String(val))
+          }}
+          value={2200 - radius}
+          className="w-full"
+          style={{ direction: 'rtl' }}
+        />
+
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-xs text-stone-300">2 ק״מ</span>
+          <span className="text-xs text-stone-400">{radiusLabel(radius)}</span>
+          <span className="text-xs text-stone-300">200 מ׳</span>
+        </div>
+      </div>
+
+      {/* ── Feed Filter ── */}
+      <div className="mb-4">
+        <div className="flex gap-1 bg-stone-100 p-1 rounded-full mb-3">
+          {(['all', 'tasks', 'offers'] as FeedFilter[]).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFeedFilter(f)}
+              className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
+                feedFilter === f
+                  ? f === 'offers'
+                    ? 'bg-white text-[#5c6bc0] shadow-sm'
+                    : 'bg-white text-[#1b5e20] shadow-sm'
+                  : 'text-stone-400'
+              }`}
+            >
+              {f === 'all' ? 'הכל' : f === 'tasks' ? 'בקשות' : 'הצעות'}
+            </button>
+          ))}
+        </div>
+
+        <button
+          ref={filterRef}
+          onClick={() => setShowFilters(prev => !prev)}
+          className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full border transition-colors w-full justify-center ${
+            showFilters || selectedCategories.length > 0 || rewardFilter !== 'all'
+              ? 'bg-stone-100 text-stone-600 border-stone-300'
+              : 'bg-white text-stone-400 border-stone-200'
+          }`}
+        >
+          🔽 סינון
+          {(selectedCategories.length > 0 || rewardFilter !== 'all') && (
+            <span className="bg-[#1b5e20] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              {selectedCategories.length + (rewardFilter !== 'all' ? 1 : 0)}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {showFilters && (
+        <div className="mb-4">
+          <div className="flex flex-wrap gap-2 mb-3">
+            <button
+              onClick={() => setSelectedCategories([])}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                selectedCategories.length === 0
+                  ? 'bg-stone-800 text-white border-stone-800'
+                  : 'bg-white text-stone-500 border-stone-200'
+              }`}
+            >
+              הכל
+            </button>
+            {CATEGORIES_LIST.map(({ emoji, label }) => (
+              <button
+                key={label}
+                onClick={() => toggleCategory(label)}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  selectedCategories.includes(label)
+                    ? 'bg-[#1b5e20] text-white border-[#1b5e20]'
+                    : 'bg-white text-stone-500 border-stone-200'
+                }`}
+              >
+                {emoji} {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-2 mb-4">
+            {([['all', 'הכל'], ['paid', '🪙 בתשלום'], ['free', '🤝 ללא תמורה']] as ['all' | 'paid' | 'free', string][]).map(([val, lbl]) => (
+              <button
+                key={val}
+                onClick={() => setRewardFilter(val)}
+                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                  rewardFilter === val
+                    ? 'bg-stone-600 text-white border-stone-600'
+                    : 'bg-white text-stone-400 border-stone-200'
+                }`}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Feed ── */}
+      {loading || cornerLoading ? (
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-4 h-28 animate-pulse border border-stone-100" />
+          ))}
+        </div>
+      ) : nearbyEmpty ? (
+        <NearbyEmptyState />
+      ) : enriched.length === 0 ? (
+        <EmptyState />
+      ) : (
+        <div className="space-y-3">
+          {enriched.map(({ item, dist }, index) => (
+            <TaskCard
+              key={item.id}
+              task={item}
+              distanceMeters={dist ?? undefined}
+              highlight={index === 0}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ── FAB ── */}
+      <Link
+        href="/publish"
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#1b5e20] text-white font-bold text-base px-8 py-4 rounded-full shadow-lg active:scale-95 transition-transform whitespace-nowrap z-40"
+      >
+        ＋ פרסום חדש
+      </Link>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0.3; transform: translateY(-2px); }
+          to   { opacity: 1;   transform: translateY(0); }
+        }
+        input[type=range] {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 3px;
+          background: #e7e5e4;
+          border-radius: 2px;
+          outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #a8a29e;
+          cursor: pointer;
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        input[type=range]::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #a8a29e;
+          cursor: pointer;
+          border: 2px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+      `}</style>
+
+      {hint && (
+        <SpeechBubble
+          hint={hint}
+          onDismiss={dismissHint}
+          anchorRef={hint === 'distance' ? sliderRef : filterRef}
+        />
+      )}
+
+    </main>
+  )
+}
+
+function NearbyEmptyState() {
+  return (
+    <div className="mt-6 text-center px-2">
+      <p className="text-stone-500 text-base mb-1">כרגע אין פרסומים בטווח הזה.</p>
+      <p className="text-sm text-stone-400">אפשר להרחיב את טווח החיפוש בסליידר שלמעלה.</p>
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div className="mt-8 text-center px-2">
+      <p className="text-stone-500 text-base mb-2">אין פרסומים כרגע באזור שלך.</p>
+      <p className="text-sm text-stone-400 leading-relaxed mb-5">
+        אפשר לפרסם בקשה או הצעה ושכנים יוכלו לראות.
+      </p>
+    </div>
+  )
+}
