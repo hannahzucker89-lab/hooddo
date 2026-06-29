@@ -45,6 +45,7 @@ const [description, setDescription] = useState('')
 const [exactDate, setExactDate] = useState('')
   const [duration, setDuration] = useState('20')
   const [reward, setReward] = useState<number | null>(null)
+  const [customReward, setCustomReward] = useState('')
 
   // ── My Corner state ──
   const [myCorner, setMyCornerState] = useState<Corner | null | undefined>(undefined) // undefined = loading
@@ -406,14 +407,15 @@ router.push(`/task/${data.id}?new=1`)
               </button>
             ))}
           </div>
-          {reward !== null && (reward > 80 || reward === -1) && reward !== 0 && (
+          {reward === -1 && (
             <div className="flex items-center gap-2 mt-3">
               <input
                 type="number"
                 min={0}
                 max={9999}
-                value={reward === -1 ? '' : reward}
-                onChange={(e) => setReward(Number(e.target.value) || 0)}
+                value={customReward}
+                onChange={(e) => setCustomReward(e.target.value)}
+                onBlur={(e) => { const n = Number(e.target.value); if (n > 0) setReward(n) }}
                 placeholder="הזינו סכום"
                 className="input py-2 text-sm"
                 autoFocus
