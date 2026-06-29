@@ -23,6 +23,7 @@ export default function ChooseCornerScreen({ onDone }: Props) {
       (pos) => {
         setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         setGpsLoading(false)
+        setGpsError(false)
       },
       () => { setGpsLoading(false); setGpsError(true) },
       { timeout: 10000, enableHighAccuracy: false }

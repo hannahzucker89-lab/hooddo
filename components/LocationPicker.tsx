@@ -69,6 +69,19 @@ export default function LocationPicker({ onSelect, selected }: Props) {
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // כש-selected משתנה מבחוץ (למשל GPS) - נזיז את המפה
+  useEffect(() => {
+    if (!selected || !mapRef.current) return
+    import('leaflet').then((L) => {
+      mapRef.current.setView([selected.lat, selected.lng], 15)
+      if (markerRef.current) {
+        markerRef.current.setLatLng([selected.lat, selected.lng])
+      } else {
+        markerRef.current = L.marker([selected.lat, selected.lng]).addTo(mapRef.current)
+      }
+    })
+  }, [selected])
+
   async function handleSearch() {
     if (query.trim().length < 2) return
     setSearching(true)
