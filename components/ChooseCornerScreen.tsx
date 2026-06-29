@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import { setMyCorner } from '@/utils/corner'
+import { setMyCorner, setTermsAccepted, getTermsAccepted } from '@/utils/corner'
 
 const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false })
 
@@ -15,6 +15,13 @@ export default function ChooseCornerScreen({ onDone }: Props) {
   const [gpsLoading, setGpsLoading] = useState(false)
   const [gpsError, setGpsError] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [termsAccepted, setTermsAcceptedState] = useState(false)
+
+  useEffect(() => {
+    getTermsAccepted().then((accepted) => {
+      if (accepted) setTermsAcceptedState(true)
+    })
+  }, [])
 
   async function useGPS() {
     if (!navigator.geolocation) return
@@ -44,6 +51,7 @@ export default function ChooseCornerScreen({ onDone }: Props) {
       label = [a?.road, a?.city || a?.town || a?.village].filter(Boolean).join(', ')
     } catch {}
     await setMyCorner({ ...coords, label })
+    if (termsAccepted) await setTermsAccepted()
     onDone()
   }
 
@@ -74,10 +82,25 @@ export default function ChooseCornerScreen({ onDone }: Props) {
         </p>
       )}
 
+      <label className="flex items-start gap-3 mt-5 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAcceptedState(e.target.checked)}
+          className="mt-0.5 w-4 h-4 accent-[#1b5e20] shrink-0"
+        />
+        <span className="text-sm text-stone-500 leading-relaxed">
+          אני מסכים/ה{' '}
+          <a href="/tos" className="underline text-stone-600" target="_blank" rel="noopener noreferrer">לתנאי השימוש</a>
+          {' '}ול
+          <a href="/privacy" className="underline text-stone-600" target="_blank" rel="noopener noreferrer">מדיניות הפרטיות</a>
+        </span>
+      </label>
+
       <button
         type="button"
         onClick={confirm}
-        disabled={!coords || saving}
+        disabled={!coords || !termsAccepted || saving}
         className="w-full mt-5 bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform disabled:opacity-50"
       >
         {saving ? 'שומר...' : 'אישור'}

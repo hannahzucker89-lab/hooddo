@@ -27,6 +27,9 @@ export default function TermsPage() {
           <p>כל משתמש אחראי על התוכן שהוא מפרסם. HoodDo שומרת לעצמה את הזכות להסיר תוכן שאינו הולם.</p>
         </div>
         <div className="h-px bg-stone-100" />
+        <p className="text-sm text-stone-500">
+          לצפייה ב<a href="/tos" className="underline text-stone-600">תנאי השימוש</a>
+        </p>
         <p className="text-sm text-stone-400">
           ראית משהו לא בסדר? hooddoapp@gmail.com
         </p>
