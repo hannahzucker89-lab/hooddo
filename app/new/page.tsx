@@ -173,7 +173,7 @@ if (!category) {
   description: description.trim() || null,
   time_option: timeOption,
   duration_minutes: isTask ? dur : 0,
-  reward_ils: reward ?? 0,
+  reward_ils: reward === -1 ? (Number(customReward) || 0) : (reward ?? 0),
   display_name: name.trim(),
   phone: user.phone ?? normalizeIsraeliPhone(phone),
   location_source: usingCorner ? 'corner' : (gpsCoords ? 'gps' : 'manual'),
@@ -415,7 +415,6 @@ router.push(`/task/${data.id}?new=1`)
                 max={9999}
                 value={customReward}
                 onChange={(e) => setCustomReward(e.target.value)}
-                onBlur={(e) => { const n = Number(e.target.value); if (n > 0) setReward(n) }}
                 placeholder="הזינו סכום"
                 className="input py-2 text-sm"
                 autoFocus
