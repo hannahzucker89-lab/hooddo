@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, Suspense } from 'react'
+import { logEvent } from '@/utils/analytics'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase, CATEGORIES } from '@/lib/supabase'
 import { isValidIsraeliPhone, normalizeIsraeliPhone } from '@/utils/phone'
@@ -70,6 +71,7 @@ const [showAuth, setShowAuth] = useState(false)
   const isTask = itemType === 'task'
 
   useEffect(() => {
+    logEvent('publish_started', { publication_type: itemType === 'task' ? 'request' : 'offer' })
     setName(getSavedName())
     setPhone(getSavedPhone())
     const idea = searchParams.get('idea')
@@ -216,6 +218,11 @@ user_id: user.id,
     }
 
     localStorage.setItem(`hooddo_token_${data.id}`, data.edit_token)
+    logEvent('publish_completed', {
+      publication_id: data.id,
+      publication_type: itemType === 'task' ? 'request' : 'offer',
+      category: category || undefined,
+    })
 router.push(`/task/${data.id}?new=1`)
   }
 

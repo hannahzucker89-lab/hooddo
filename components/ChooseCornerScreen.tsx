@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { setMyCorner, setTermsAccepted, getTermsAccepted } from '@/utils/corner'
+import { logEvent } from '@/utils/analytics'
 
 const LocationPicker = dynamic(() => import('@/components/LocationPicker'), { ssr: false })
 
 interface Props {
   onDone: () => void
+  isChange?: boolean
 }
 
-export default function ChooseCornerScreen({ onDone }: Props) {
+export default function ChooseCornerScreen({ onDone, isChange }: Props) {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [gpsLoading, setGpsLoading] = useState(false)
   const [gpsError, setGpsError] = useState(false)
@@ -52,6 +54,7 @@ export default function ChooseCornerScreen({ onDone }: Props) {
     } catch {}
     await setMyCorner({ ...coords, label })
     if (termsAccepted) await setTermsAccepted()
+    logEvent(isChange ? 'corner_changed' : 'corner_selected')
     onDone()
   }
 

@@ -62,7 +62,7 @@ export default function MyCornerPage() {
       )}
 
       {showPicker && (
-        <ChooseCornerScreen onDone={handleDone} />
+        <ChooseCornerScreen onDone={handleDone} isChange={!!corner} />
       )}
     </main>
   )

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Onboarding, { useOnboardingDone } from '@/components/Onboarding'
+import { logEvent } from '@/utils/analytics'
 import './globals.css'
 
 export default function RootLayout({
@@ -17,6 +18,7 @@ export default function RootLayout({
     const done = useOnboardingDone()
     setShowOnboarding(!done)
     setReady(true)
+    logEvent('app_open')
   }, [])
 
   return (
@@ -32,7 +34,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[#f9f7f4]">
         {ready && showOnboarding ? (
-          <Onboarding onComplete={() => setShowOnboarding(false)} />
+          <Onboarding onComplete={() => { logEvent('onboarding_completed'); setShowOnboarding(false) }} />
         ) : (
           children
         )}

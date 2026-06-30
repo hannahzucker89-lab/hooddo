@@ -8,6 +8,7 @@ import { normalizeIsraeliPhone } from '@/utils/phone'
 import { calculateDistanceMeters, formatDistance } from '@/utils/distance'
 import { getMyCorner } from '@/utils/corner'
 import PhoneAuthModal from '@/components/PhoneAuthModal'
+import { logEvent } from '@/utils/analytics'
 
 type ViewerLocation = { lat: number; lng: number }
 
@@ -44,6 +45,12 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
       if (!data) { setLoading(false); return }
 
       setTask(data as Task)
+      logEvent('publication_opened', {
+        publication_id: data.id,
+        publication_type: data.type === 'offer' ? 'offer' : 'request',
+        category: data.category ?? undefined,
+        source: isNew ? 'publish' : 'direct',
+      })
 
       const token = localStorage.getItem(`hooddo_token_${data.id}`)
       const { data: { user } } = await supabase.auth.getUser()
@@ -95,7 +102,14 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
       task_id: task.id,
       token
     })
-    if (success) { router.push('/'); return }
+    if (success) {
+      logEvent('publication_closed', {
+        publication_id: task.id,
+        publication_type: task.type === 'offer' ? 'offer' : 'request',
+        category: task.category ?? undefined,
+      })
+      router.push('/'); return
+    }
   }
   const { data: { user } } = await supabase.auth.getUser()
   if (user && user.id === task.user_id) {
@@ -104,7 +118,14 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
       .update({ is_active: false })
       .eq('id', task.id)
       .eq('user_id', user.id)
-    if (!error) { router.push('/'); return }
+    if (!error) {
+      logEvent('publication_closed', {
+        publication_id: task.id,
+        publication_type: task.type === 'offer' ? 'offer' : 'request',
+        category: task.category ?? undefined,
+      })
+      router.push('/'); return
+    }
   }
   setClosing(false)
 }
@@ -302,6 +323,7 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
       ) : viewerVerified ? (
         <a
           href={whatsappUrl}
+          onClick={() => task && logEvent('contact_clicked', { publication_id: task.id, publication_type: task.type === 'offer' ? 'offer' : 'request', category: task.category ?? undefined, source: 'task_detail' })}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
