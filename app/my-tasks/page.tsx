@@ -6,6 +6,7 @@ import { supabase, type Task } from '@/lib/supabase'
 import TaskCard from '@/components/TaskCard'
 import HamburgerMenu from '@/components/HamburgerMenu'
 import PhoneAuthModal from '@/components/PhoneAuthModal'
+import { logEvent } from '@/utils/analytics'
 
 type FilterType = 'all' | 'task' | 'offer'
 
@@ -17,6 +18,7 @@ export default function MyTasksPage() {
   const [showAuth, setShowAuth] = useState(false)
 
   useEffect(() => {
+    logEvent('my_tasks_viewed')
     async function init() {
       const { data: { user: authUser } } = await supabase.auth.getUser()
       setUser(authUser ? { id: authUser.id } : null)

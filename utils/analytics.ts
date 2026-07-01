@@ -14,14 +14,26 @@ function getSessionId(): string {
 
 export type EventName =
   | 'app_open'
+  | 'onboarding_started'
+  | 'onboarding_step_viewed'
   | 'onboarding_completed'
+  | 'feed_viewed'
+  | 'feed_filter_changed'
+  | 'feed_empty_shown'
+  | 'corner_screen_viewed'
   | 'corner_selected'
   | 'corner_changed'
+  | 'publish_type_selected'
   | 'publish_started'
   | 'publish_completed'
   | 'publication_opened'
+  | 'contact_blocked_shown'
+  | 'auth_modal_opened'
+  | 'auth_completed'
   | 'contact_clicked'
   | 'publication_closed'
+  | 'my_tasks_viewed'
+  | 'republish_clicked'
   | 'share_clicked'
 
 export type EventOptions = {
@@ -29,6 +41,9 @@ export type EventOptions = {
   publication_type?: 'request' | 'offer' | string
   category?: string
   source?: 'feed' | 'direct' | 'my_tasks' | 'task_detail' | 'publish' | string
+  step?: number | string
+  filter_type?: 'tab' | 'category' | 'radius' | string
+  value?: string | number
 }
 
 export async function logEvent(eventName: EventName, options: EventOptions = {}): Promise<void> {

@@ -20,6 +20,7 @@ export default function ChooseCornerScreen({ onDone, isChange }: Props) {
   const [termsAccepted, setTermsAcceptedState] = useState(false)
 
   useEffect(() => {
+    logEvent('corner_screen_viewed')
     getTermsAccepted().then((accepted) => {
       if (accepted) setTermsAcceptedState(true)
     })

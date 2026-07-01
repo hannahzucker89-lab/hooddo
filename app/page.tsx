@@ -8,6 +8,7 @@ import { useEffect, useState, useRef } from 'react'
 import HamburgerMenu from '@/components/HamburgerMenu'
 import ChooseCornerScreen from '@/components/ChooseCornerScreen'
 import { getMyCorner, type Corner } from '@/utils/corner'
+import { logEvent } from '@/utils/analytics'
 
 type FeedFilter = 'all' | 'tasks' | 'offers'
 
@@ -137,9 +138,11 @@ export default function HomePage() {
   }, [])
 
   function toggleCategory(label: string) {
-    setSelectedCategories(prev =>
-      prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label]
-    )
+    setSelectedCategories(prev => {
+      const next = prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label]
+      logEvent('feed_filter_changed', { filter_type: 'category', value: label })
+      return next
+    })
   }
 
   function isExpired(item: Task): boolean {
@@ -183,6 +186,7 @@ export default function HomePage() {
     })
 
   const nearbyEmpty = myCorner && enriched.length === 0 && typeFiltered.length > 0
+  useEffect(() => { if (nearbyEmpty) logEvent('feed_empty_shown') }, [nearbyEmpty])
 
   if (!cornerLoading && !myCorner) {
     return (
@@ -227,6 +231,7 @@ export default function HomePage() {
           onChange={(e) => {
             const val = 2200 - Number(e.target.value)
             setRadius(val)
+            logEvent('feed_filter_changed', { filter_type: 'radius', value: val })
             localStorage.setItem('hooddo_radius', String(val))
           }}
           value={2200 - radius}
@@ -247,7 +252,7 @@ export default function HomePage() {
           {(['all', 'tasks', 'offers'] as FeedFilter[]).map((f) => (
             <button
               key={f}
-              onClick={() => setFeedFilter(f)}
+              onClick={() => { setFeedFilter(f); logEvent('feed_filter_changed', { filter_type: 'tab', value: f }) }}
               className={`flex-1 py-2 rounded-full text-sm font-bold transition-all ${
                 feedFilter === f
                   ? f === 'offers'

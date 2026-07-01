@@ -305,6 +305,11 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
                 duration: String(task.duration_minutes ?? 0),
                 time_option: task.time_option ?? '',
               })
+              logEvent('republish_clicked', {
+                publication_id: task.id,
+                publication_type: task.type === 'offer' ? 'offer' : 'request',
+                category: task.category ?? undefined,
+              })
               router.push(`/new?${params.toString()}`)
             }}
             className="w-full bg-[#1b5e20] text-white font-bold py-3.5 rounded-full text-sm active:scale-95 transition-transform"
@@ -332,7 +337,15 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
         </a>
       ) : (
         <button
-          onClick={() => setShowViewerAuth(true)}
+          onClick={() => {
+            if (task) logEvent('contact_blocked_shown', {
+              publication_id: task.id,
+              publication_type: task.type === 'offer' ? 'offer' : 'request',
+              category: task.category ?? undefined,
+            })
+            logEvent('auth_modal_opened')
+            setShowViewerAuth(true)
+          }}
           className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white font-bold py-4 rounded-full shadow-sm active:scale-95 transition-transform text-base"
         >
           💬 יצירת קשר
@@ -342,6 +355,7 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
       {showViewerAuth && (
         <PhoneAuthModal
           onSuccess={async () => {
+            logEvent('auth_completed')
             setShowViewerAuth(false)
             setViewerVerified(true)
             await fetchPhoneAfterAuth()

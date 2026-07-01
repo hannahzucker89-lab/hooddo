@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { logEvent } from '@/utils/analytics'
 
 const KEY_DONE = 'hooddo_onboarding_done_v2'
 
@@ -22,6 +23,15 @@ const EXAMPLES = [
 export default function Onboarding({ onComplete }: Props) {
   const [screen, setScreen] = useState<1 | 2 | 3>(1)
   const touchStartX = useRef<number | null>(null)
+
+  useEffect(() => {
+    logEvent('onboarding_started')
+    logEvent('onboarding_step_viewed', { step: 1 })
+  }, [])
+
+  useEffect(() => {
+    if (screen > 1) logEvent('onboarding_step_viewed', { step: screen })
+  }, [screen])
 
   function finish() {
     localStorage.setItem(KEY_DONE, 'true')

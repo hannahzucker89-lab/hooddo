@@ -2,12 +2,14 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { logEvent } from '@/utils/analytics'
 
 export default function PublishPage() {
   const router = useRouter()
   const [pendingType, setPendingType] = useState<'task' | 'offer' | null>(null)
 
   async function handleTypeSelect(type: 'task' | 'offer') {
+    logEvent('publish_type_selected', { publication_type: type === 'task' ? 'request' : 'offer' })
     const localPref = localStorage.getItem('hooddo_pending_verb_form')
     if (localPref === 'male' || localPref === 'female') {
       router.push(`/new?type=${type}`)
