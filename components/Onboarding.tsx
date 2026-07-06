@@ -38,6 +38,11 @@ export default function Onboarding({ onComplete }: Props) {
     onComplete()
   }
 
+  function skip() {
+    logEvent('onboarding_skipped')
+    finish()
+  }
+
   function next() {
     if (screen < 3) setScreen((s) => (s + 1) as 1 | 2 | 3)
     else finish()
@@ -145,6 +150,13 @@ export default function Onboarding({ onComplete }: Props) {
             className="w-full bg-[#1b5e20] text-white font-bold text-base py-4 rounded-full active:scale-95 transition-transform"
           >
             {screen === 3 ? 'יאללה' : 'המשך'}
+          </button>
+
+          <button
+            onClick={skip}
+            className="w-full text-center text-xs text-stone-400 py-1"
+          >
+            דלג/י בינתיים
           </button>
 
         </div>

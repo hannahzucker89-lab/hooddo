@@ -179,11 +179,7 @@ export default function HomePage() {
       return { item, dist }
     })
     .filter(({ dist }) => myCorner && dist != null ? dist <= radius : true)
-    .sort((a, b) => {
-      if (myCorner && a.dist != null && b.dist != null && a.dist !== b.dist)
-        return a.dist - b.dist
-      return new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime()
-    })
+    .sort((a, b) => new Date(b.item.created_at).getTime() - new Date(a.item.created_at).getTime())
 
   const nearbyEmpty = myCorner && enriched.length === 0 && typeFiltered.length > 0
   useEffect(() => { if (nearbyEmpty) logEvent('feed_empty_shown') }, [nearbyEmpty])

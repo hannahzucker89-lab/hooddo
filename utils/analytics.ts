@@ -17,6 +17,7 @@ export type EventName =
   | 'onboarding_started'
   | 'onboarding_step_viewed'
   | 'onboarding_completed'
+  | 'onboarding_skipped'
   | 'feed_viewed'
   | 'feed_filter_changed'
   | 'feed_empty_shown'
