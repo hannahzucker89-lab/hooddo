@@ -218,7 +218,7 @@ user_id: user.id,
     }
 
     localStorage.setItem(`hooddo_token_${data.id}`, data.edit_token)
-    logEvent('publish_completed', {
+    await logEvent('publish_completed', {
       publication_id: data.id,
       publication_type: itemType === 'task' ? 'request' : 'offer',
       category: category || undefined,
