@@ -36,6 +36,7 @@ export type EventName =
   | 'my_tasks_viewed'
   | 'republish_clicked'
   | 'share_clicked'
+  | 'publication_edited'
 
 export type EventOptions = {
   publication_id?: number | string

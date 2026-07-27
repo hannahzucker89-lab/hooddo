@@ -30,6 +30,7 @@ export default function TaskDetail() {
   const [closing, setClosing] = useState(false)
   const [distance, setDistance] = useState<number | null>(null)
   const [shared, setShared] = useState(false)
+  const [justClosed, setJustClosed] = useState(false)
 const [whatsappUrl, setWhatsappUrl] = useState<string>('#')
 const [viewerVerified, setViewerVerified] = useState(false)
 const [showViewerAuth, setShowViewerAuth] = useState(false)
@@ -108,7 +109,9 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
         publication_type: task.type === 'offer' ? 'offer' : 'request',
         category: task.category ?? undefined,
       })
-      router.push('/'); return
+      setJustClosed(true)
+      setClosing(false)
+      return
     }
   }
   const { data: { user } } = await supabase.auth.getUser()
@@ -124,7 +127,9 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
         publication_type: task.type === 'offer' ? 'offer' : 'request',
         category: task.category ?? undefined,
       })
-      router.push('/'); return
+      setJustClosed(true)
+      setClosing(false)
+      return
     }
   }
   setClosing(false)
@@ -205,8 +210,41 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
           ניהול הפרסום
         </button>
         <button
+          onClick={() => router.push(`/task/${task.id}/edit`)}
+          className="w-full text-stone-500 text-sm underline mb-3"
+        >
+          לשינוי פרטים
+        </button>
+        <button
           onClick={() => router.push('/publish')}
           className="w-full border border-stone-200 text-stone-600 font-semibold py-3 rounded-full text-sm mb-3"
+        >
+          ➕ פרסום נוסף
+        </button>
+        <button
+          onClick={() => router.push('/')}
+          className="text-stone-400 text-sm underline"
+        >
+          חזרה לפיד
+        </button>
+      </main>
+    )
+  }
+
+  // ── Just closed confirmation ──
+  if (justClosed) {
+    return (
+      <main className="max-w-md mx-auto px-4 pt-16 text-center">
+        <div className="text-5xl mb-4">🎉</div>
+        <h1 className="text-2xl font-extrabold text-stone-900 mb-2">
+          איזה כיף שזה הסתדר!
+        </h1>
+        <p className="text-stone-500 text-sm mb-8">
+          השכנים כבר לא יראו את הפרסום הזה בפיד.
+        </p>
+        <button
+          onClick={() => router.push('/publish')}
+          className="w-full bg-[#1b5e20] text-white font-bold py-4 rounded-full mb-3"
         >
           ➕ פרסום נוסף
         </button>
@@ -318,13 +356,21 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
           </button>
         </div>
       ) : isOwner ? (
-        <button
-          onClick={closeTask}
-          disabled={closing}
-          className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-40"
-        >
-          {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
-        </button>
+        <div className="space-y-2">
+          <button
+            onClick={() => router.replace(`/task/${task.id}/edit`)}
+            className="w-full border border-stone-200 text-stone-600 font-semibold py-3.5 rounded-full text-sm active:scale-95 transition-transform"
+          >
+            ✏️ עריכת פרטים
+          </button>
+          <button
+            onClick={closeTask}
+            disabled={closing}
+            className="w-full border border-red-200 text-red-500 font-semibold py-3.5 rounded-full text-sm active:scale-95 transition-transform disabled:opacity-40"
+          >
+            {closing ? 'סוגר...' : isOffer ? 'סגירת הצעה' : 'סגירת בקשה'}
+          </button>
+        </div>
       ) : viewerVerified ? (
         <a
           href={whatsappUrl}
@@ -363,6 +409,12 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
           onClose={() => setShowViewerAuth(false)}
         />
       )}
+
+      <div className="text-center mt-6">
+        <button onClick={() => router.push('/')} className="text-stone-400 text-sm underline">
+          חזרה לפיד
+        </button>
+      </div>
 
     </main>
   )
