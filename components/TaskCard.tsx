@@ -90,12 +90,6 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
             {task.exact_date && (
               <span>📅 {new Date(task.exact_date + 'T00:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}</span>
             )}
-            {task.exact_date && (
-              <span>📅 {new Date(task.exact_date + 'T00:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}</span>
-            )}
-            {task.exact_date && (
-              <span>📅 {new Date(task.exact_date + 'T00:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })}</span>
-            )}
           </>
         )}
         {distanceMeters !== undefined && (

@@ -174,6 +174,7 @@ if (!category) {
   title: title.trim(),
   description: description.trim() || null,
   time_option: timeOption,
+  exact_date: exactDate || null,
   duration_minutes: isTask ? dur : 0,
   reward_ils: reward === -1 ? (Number(customReward) || 0) : (reward ?? 0),
   display_name: name.trim(),

@@ -60,7 +60,8 @@ export async function logEvent(eventName: EventName, options: EventOptions = {})
       category: options.category ?? null,
       source: options.source ?? null,
     })
-  } catch {
-    // analytics must never break the app
+  } catch (err) {
+    // analytics must never break the app — אבל כן רוצים לראות את זה בקונסול בזמן בדיקות
+    console.error('[HoodDo] analytics event failed:', eventName, err)
   }
 }
