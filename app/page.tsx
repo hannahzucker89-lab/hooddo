@@ -184,6 +184,10 @@ export default function HomePage() {
   const nearbyEmpty = myCorner && enriched.length === 0 && typeFiltered.length > 0
   useEffect(() => { if (nearbyEmpty) logEvent('feed_empty_shown') }, [nearbyEmpty])
 
+  useEffect(() => {
+    if (!loading && !cornerLoading && myCorner) logEvent('feed_viewed')
+  }, [loading, cornerLoading, myCorner])
+
   if (!cornerLoading && !myCorner) {
     return (
       <ChooseCornerScreen

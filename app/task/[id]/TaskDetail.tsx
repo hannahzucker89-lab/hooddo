@@ -149,6 +149,7 @@ const [showViewerAuth, setShowViewerAuth] = useState(false)
 
   async function handleShare() {
   if (!task) return
+  logEvent('share_clicked', { publication_id: task.id, publication_type: task.type === 'offer' ? 'offer' : 'request', category: task.category ?? undefined, source: 'task_detail' })
   const url = window.location.href
   const isOffer = task.type === 'offer'
   const shareText = isOffer

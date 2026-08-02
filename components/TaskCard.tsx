@@ -7,6 +7,7 @@ import { itemType } from '@/lib/supabase'
 import { formatDistance } from '@/utils/distance'
 import { getSavedPhone } from '@/utils/storage'
 import { normalizeIsraeliPhone } from '@/utils/phone'
+import { logEvent } from '@/utils/analytics'
 
 interface Props {
   task: Task
@@ -128,6 +129,7 @@ export default function TaskCard({ task, distanceMeters, highlight, variant = 'p
         <button
           onClick={async (e) => {
             e.preventDefault()
+            logEvent('share_clicked', { publication_id: task.id, publication_type: isOffer ? 'offer' : 'request', category: task.category ?? undefined, source: 'feed' })
             const url = `${window.location.origin}/task/${task.id}`
             const shareText = isOffer
               ? `ראיתי הצעה ב-HoodDo שחשבתי שיכולה להתאים לך — ${task.title}`
