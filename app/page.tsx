@@ -9,6 +9,8 @@ import HamburgerMenu from '@/components/HamburgerMenu'
 import ChooseCornerScreen from '@/components/ChooseCornerScreen'
 import { getMyCorner, type Corner } from '@/utils/corner'
 import { logEvent } from '@/utils/analytics'
+import { EMPTY_STATE_EXAMPLES } from '@/lib/emptyStateExamples'
+import ExampleTaskCard from '@/components/ExampleTaskCard'
 
 type FeedFilter = 'all' | 'tasks' | 'offers'
 
@@ -81,6 +83,8 @@ export default function HomePage() {
   const [allItems, setAllItems] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [feedFilter, setFeedFilter] = useState<FeedFilter>('all')
+  const [shuffledExamples] = useState(() => [...EMPTY_STATE_EXAMPLES].sort(() => Math.random() - 0.5))
+  const [showExamples, setShowExamples] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [myCorner, setMyCornerState] = useState<Corner | null>(null)
   const [cornerLoading, setCornerLoading] = useState(true)
@@ -351,6 +355,33 @@ export default function HomePage() {
               highlight={index === 0}
             />
           ))}
+        </div>
+      )}
+
+      {/* ── Example ideas ── */}
+      {!loading && !cornerLoading && (
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={() => setShowExamples((v) => !v)}
+            className="text-xs text-stone-400 underline mb-3"
+          >
+            {showExamples ? 'הסתר דוגמאות' : 'הצג רעיונות לדוגמה'}
+          </button>
+          {showExamples && (
+            <div className="space-y-3">
+              {shuffledExamples
+                .filter((ex) => {
+                  if (feedFilter === 'tasks') return ex.type === 'task'
+                  if (feedFilter === 'offers') return ex.type === 'offer'
+                  return true
+                })
+                .slice(0, 3)
+                .map((example, i) => (
+                  <ExampleTaskCard key={i} example={example} />
+                ))}
+            </div>
+          )}
         </div>
       )}
 
